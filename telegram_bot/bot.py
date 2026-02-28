@@ -1,58 +1,80 @@
-# bot.py
-import logging
 import requests
-from io import BytesIO
+import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 
 # Вставьте сюда токен вашего бота (латиница, без пробелов!)
 TOKEN = "8728740717:AAH36D0H3NA54GHCVHHeQh840Wd-oXSQNtM"
 
-logging.basicConfig(level=logging.INFO)
+SERVER_URL = "http://localhost:5000/analyze"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RESULTS_DIR = os.path.join(BASE_DIR, "results")
+
 
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     try:
-        # получаем фото от пользователя (последнее в массиве)
+
         photo = update.message.photo[-1]
+
         file = await photo.get_file()
-        await file.download_to_drive("input.jpg")  # сохраняем локально
+
+        input_path = "temp_input.jpg"
+
+        await file.download_to_drive(input_path)
 
         await update.message.reply_text("Фото получено, анализируем...")
 
-        # отправка на Flask сервер
-        with open("input.jpg", "rb") as f:
-            response = requests.post("http://127.0.0.1:5000/analyze", files={"image": f})
+        # отправляем в Flask
+        with open(input_path, "rb") as f:
+
+            response = requests.post(
+                "http://127.0.0.1:5000/analyze",
+                files={"image": f}
+            )
+
+        if response.status_code != 200:
+
+            await update.message.reply_text("Ошибка сервера Flask")
+            return
+
         data = response.json()
-        metrics = data["metrics"]
 
-        # скачиваем обработанное изображение с сервера
-        url = "http://127.0.0.1:5000/results/input.jpg"
-        res = requests.get(url)
-        res.raise_for_status()  # если что-то не так, будет исключение
+        image_url = data["image_url"]
 
-        # отправляем фото пользователю
-        await update.message.reply_photo(photo=BytesIO(res.content))
+        # получаем имя файла
+        filename = image_url.split("/")[-1]
 
-        # отправляем метрики
-        await update.message.reply_text(
-            f"Корень: {metrics['root_length']} см\n"
-            f"Стебель: {metrics['stem_length']} см\n"
-            f"Листья: {metrics['leaf_area']} см²"
-        )
+        result_path = os.path.join(RESULTS_DIR, filename)
+
+        print("Ищем файл тут:", result_path)
+        print("Существует:", os.path.exists(result_path))
+
+        # проверяем что файл существует
+        if not os.path.exists(result_path):
+
+            await update.message.reply_text("Файл результата не найден")
+            return
+
+        # отправляем фото
+        with open(result_path, "rb") as img:
+
+            await update.message.reply_photo(photo=img)
+
+        await update.message.reply_text("Анализ завершен")
 
     except Exception as e:
-        logging.error(f"Ошибка при обработке фото: {e}")
-        await update.message.reply_text("Произошла ошибка при обработке изображения.")
 
-async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Отправьте изображение растения.")
+        print("BOT ERROR:", e)
 
-# создаем приложение бота
+        await update.message.reply_text("Ошибка анализа изображения")
+
+
+# запуск бота
 app = ApplicationBuilder().token(TOKEN).build()
 
-# добавляем обработчики
 app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-app.add_handler(MessageHandler(filters.TEXT, handle_text))
 
-print("Bot started...")
+print("Bot started")
+
 app.run_polling()

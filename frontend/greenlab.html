@@ -9,19 +9,40 @@ body {
     font-family: Arial, sans-serif;
     background:#F5F7F6;
 }
+
 .header {
-    height:70px;
-    background:white;
+    height: 100px;
+    background:#1B5E20;
     border-bottom:1px solid #E0E0E0;
+
     display:flex;
     align-items:center;
-    justify-content:center;
-    font-size:24px;
-    font-weight:600;
-    color:#2E7D32;
+    justify-content:space-between;
+
+    padding:0 20px;
+
+    position:relative;
 }
+
+.header-img.left {
+    height:80px;
+    object-fit:contain;
+}
+
+.header-img.right {
+    height: 50px;
+    object-fit:contain;
+}
+
+.header-img.center {
+    height:80px;
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+}
+
 .chat-container {
-    height:calc(100vh - 140px);
+    height:calc(100vh - 260px); /* уменьшили высоту на счет увеличения шапки и нижней зоны */
     overflow-y:auto;
     padding:20px;
 }
@@ -39,29 +60,33 @@ body {
     background:white;
     border:1px solid #E0E0E0;
 }
-.input-container {
-    height:70px;
+
+#drop-area {
+    height:100px; /* чуть выше */
     background:white;
     border-top:1px solid #E0E0E0;
     display:flex;
     align-items:center;
+    justify-content:center;
     padding:10px;
+    border: 2px dashed #2E7D32;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #2E7D32;
+    font-weight:600;
+    transition: all 0.3s ease; /* плавный переход для анимации */
 }
-input[type="text"] {
-    flex:1;
-    padding:10px;
-    border-radius:10px;
-    border:1px solid #ccc;
+#drop-area.dragover {
+    background: #E8F5E9;
+    transform: scale(1.02); /* слегка увеличиваем при наведении */
+    box-shadow: 0 0 10px rgba(46,125,50,0.4);
 }
-button {
-    margin-left:10px;
-    padding:10px 15px;
-    border:none;
-    border-radius:10px;
-    background:#2E7D32;
-    color:white;
-    cursor:pointer;
+
+#fileInput {
+    display:none;
 }
+
+/* Изображения в чате */
 img.preview, img.result {
     max-width:200px;
     border-radius:10px;
@@ -71,21 +96,26 @@ img.preview, img.result {
 <body>
 
 <div class="header">
-🌿 ФотоСинтез
+    <img src="images/logo2.png" class="header-img left" alt="Left">
+
+    <img src="images/name.png" class="header-img center" alt="Center">
+
+    <img src="images/user.png" class="header-img right" alt="Right">
 </div>
 
 <div class="chat-container" id="chat"></div>
 
-<div class="input-container">
-<input type="file" id="fileInput">
-<input type="text" id="textInput" placeholder="Введите сообщение...">
-<button onclick="sendMessage()">Отправить</button>
+<div id="drop-area">
+    Перетащите изображение сюда или нажмите для выбора
+    <input type="file" id="fileInput">
 </div>
 
 <script>
 const chat = document.getElementById("chat");
+const dropArea = document.getElementById("drop-area");
+const fileInput = document.getElementById("fileInput");
 
-// функция добавления сообщений в чат
+// функция добавления сообщений
 function addMessage(content, type) {
     const div = document.createElement("div");
     div.className = "message " + type;
@@ -97,26 +127,15 @@ function addMessage(content, type) {
     chat.scrollTop = chat.scrollHeight;
 }
 
-// отправка текстового сообщения
-function sendMessage() {
-    const text = document.getElementById("textInput").value;
-    if(text) addMessage(text, "user");
-    document.getElementById("textInput").value = "";
-    addMessage("Пожалуйста, отправьте изображение растения.", "bot");
-}
-
-// отправка изображения на сервер
-document.getElementById("fileInput").onchange = async function() {
-    const file = this.files[0];
+// обработка выбранного файла
+async function handleFile(file) {
     if(!file) return;
 
-    // показываем превью пользователю
     const imgUser = document.createElement("img");
     imgUser.className = "preview";
     imgUser.src = URL.createObjectURL(file);
     addMessage(imgUser, "user");
 
-    // добавляем сообщение "анализируем"
     addMessage("Анализируем изображение...", "bot");
 
     const formData = new FormData();
@@ -129,14 +148,11 @@ document.getElementById("fileInput").onchange = async function() {
         });
         const data = await response.json();
 
-        // показываем результат от сервера
         const imgBot = document.createElement("img");
         imgBot.className = "result";
-        // путь через endpoint /results
-        imgBot.src = "http://127.0.0.1:5000/results/" + file.name + "?t=" + new Date().getTime();
+        imgBot.src = data.image_url + "?t=" + new Date().getTime();
         addMessage(imgBot, "bot");
 
-        // показываем метрики
         const metricsText = 
 `Результаты анализа:
 
@@ -155,7 +171,30 @@ document.getElementById("fileInput").onchange = async function() {
         addMessage("Ошибка при анализе изображения.", "bot");
         console.error(err);
     }
-};
+}
+
+// обработка стандартного input
+fileInput.onchange = () => handleFile(fileInput.files[0]);
+
+// drag & drop
+dropArea.addEventListener("click", () => fileInput.click());
+
+dropArea.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropArea.classList.add("dragover");
+});
+
+dropArea.addEventListener("dragleave", () => {
+    dropArea.classList.remove("dragover");
+});
+
+dropArea.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropArea.classList.remove("dragover");
+    if(e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
+    }
+});
 </script>
 
 </body>
