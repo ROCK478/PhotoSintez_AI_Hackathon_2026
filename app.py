@@ -38,7 +38,7 @@ def analyze():
             raise Exception("cv2.imwrite failed")
 
         url = f"http://localhost:5000/results/{filename}"
-
+        print("METRICS SENT TO FRONTEND:", metrics)
         return jsonify({
         "image_url": f"http://127.0.0.1:5000/results/{filename}",
         "metrics": metrics

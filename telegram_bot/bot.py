@@ -14,15 +14,10 @@ RESULTS_DIR = os.path.join(BASE_DIR, "results")
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
-
         photo = update.message.photo[-1]
-
         file = await photo.get_file()
-
         input_path = "temp_input.jpg"
-
         await file.download_to_drive(input_path)
-
         await update.message.reply_text("Фото получено, анализируем...")
 
         # отправляем в Flask
@@ -41,18 +36,9 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         data = response.json()
 
         image_url = data["image_url"]
-
-        # получаем имя файла
         filename = image_url.split("/")[-1]
-
         result_path = os.path.join(RESULTS_DIR, filename)
-
-        print("Ищем файл тут:", result_path)
-        print("Существует:", os.path.exists(result_path))
-
-        # проверяем что файл существует
         if not os.path.exists(result_path):
-
             await update.message.reply_text("Файл результата не найден")
             return
 
@@ -70,11 +56,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Ошибка анализа изображения")
 
 
-# запуск бота
 app = ApplicationBuilder().token(TOKEN).build()
-
 app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-
-print("Bot started")
-
+print("Bot started...")
 app.run_polling()

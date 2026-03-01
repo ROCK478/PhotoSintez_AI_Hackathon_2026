@@ -3,66 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <title>ФотоСинтез</title>
+
+<!-- Иконка сайта -->
+<link rel="icon" href="frontend/images/favicon-32x32.png" type="image/x-icon">
+
 <style>
 body {
     margin:0;
     font-family: Arial, sans-serif;
     background:#F5F7F6;
+    display:flex;
+    flex-direction:column;
+    height:100vh;
 }
-
 .header {
-    height: 100px;
+    height:100px;
     background:#1B5E20;
     border-bottom:1px solid #E0E0E0;
-
     display:flex;
     align-items:center;
     justify-content:space-between;
-
     padding:0 20px;
-
     position:relative;
 }
+.header-img.left { height:80px; object-fit:contain; }
+.header-img.center { height:80px; position:absolute; left:50%; transform:translateX(-50%); }
+.header-img.right { height:50px; object-fit:contain; }
 
-.header-img.left {
-    height:80px;
-    object-fit:contain;
+.main {
+    flex:1;
+    display:flex;
+    overflow:hidden;
 }
-
-.header-img.right {
-    height: 50px;
-    object-fit:contain;
-}
-
-.header-img.center {
-    height:80px;
-    position:absolute;
-    left:50%;
-    transform:translateX(-50%);
-}
-
-.chat-container {
-    height:calc(100vh - 260px); /* уменьшили высоту на счет увеличения шапки и нижней зоны */
-    overflow-y:auto;
+.sidebar {
+    width:250px;
+    background:#2E7D32;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
     padding:20px;
+    color:white;
 }
-.message {
-    max-width:60%;
-    padding:12px;
-    margin:10px;
-    border-radius:16px;
+.sidebar-top, .sidebar-middle, .sidebar-bottom {
+    display:flex;
+    flex-direction:column;
 }
-.user {
-    background:#E8F5E9;
-    margin-left:auto;
-}
-.bot {
+.sidebar-top { margin-bottom:10px; }
+.sidebar-middle { flex:1; margin:10px 0; overflow-y:auto; }
+.sidebar-bottom { margin-top:10px; }
+.sidebar button {
     background:white;
-    border:1px solid #E0E0E0;
+    color:#2E7D32;
+    border:none;
+    padding:12px;
+    border-radius:8px;
+    font-weight:600;
+    cursor:pointer;
+    margin-bottom:10px;
+    transition: all 0.2s;
+}
+.sidebar button:hover { background:#E8F5E9; }
+
+.content {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    background:#F5F7F6;
+    overflow:hidden;
+}
+.chat-container { flex:1; overflow-y:auto; padding:20px; }
+.message { max-width:60%; padding:12px; margin:10px; border-radius:16px; position:relative; opacity:0; transform: translateY(20px); animation: fadeInUp 0.3s forwards; }
+.user { background:#E8F5E9; margin-left:auto; }
+.bot { background:white; border:1px solid #E0E0E0; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+
+@keyframes fadeInUp {
+    to { opacity:1; transform:translateY(0); }
+}
+
+.bot img.result { display:block; max-width:100%; border-radius:10px; margin-bottom:8px; transition: transform 0.2s; }
+.bot img.result:hover { transform: scale(1.05); }
+
+.bot img.download-icon {
+    width:24px;
+    height:24px;
+    position:absolute;
+    bottom:5px;
+    right:5px;
+    cursor:pointer;
 }
 
 #drop-area {
-    height:100px; /* чуть выше */
+    height:120px;
     background:white;
     border-top:1px solid #E0E0E0;
     display:flex;
@@ -74,127 +105,206 @@ body {
     cursor: pointer;
     color: #2E7D32;
     font-weight:600;
-    transition: all 0.3s ease; /* плавный переход для анимации */
+    transition: all 0.3s ease;
 }
-#drop-area.dragover {
-    background: #E8F5E9;
-    transform: scale(1.02); /* слегка увеличиваем при наведении */
-    box-shadow: 0 0 10px rgba(46,125,50,0.4);
-}
-
-#fileInput {
-    display:none;
-}
-
-/* Изображения в чате */
-img.preview, img.result {
-    max-width:200px;
-    border-radius:10px;
-}
+#drop-area.dragover { background: #E8F5E9; transform: scale(1.02); box-shadow: 0 0 10px rgba(46,125,50,0.4); }
+#fileInput { display:none; }
+img.preview { max-width:200px; border-radius:10px; }
 </style>
 </head>
 <body>
 
 <div class="header">
     <img src="frontend/images/logo2.png" class="header-img left" alt="Left">
-
     <img src="frontend/images/name.png" class="header-img center" alt="Center">
-
     <img src="frontend/images/user.png" class="header-img right" alt="Right">
 </div>
 
-<div class="chat-container" id="chat"></div>
+<div class="main">
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <button id="newChat">Новый чат</button>
+        </div>
+        <div class="sidebar-middle">
+            <!-- Здесь будут чаты -->
+        </div>
+        <div class="sidebar-bottom">
+            <div>Имя пользователя</div>
+            <button id="subscribe">Оформить подписку</button>
+        </div>
+    </div>
 
-<div id="drop-area">
-    Перетащите изображение сюда или нажмите для выбора
-    <input type="file" id="fileInput">
+    <div class="content">
+        <div class="chat-container" id="chat"></div>
+
+        <div id="drop-area">
+            Перетащите изображение сюда или нажмите для выбора
+            <input type="file" id="fileInput">
+        </div>
+    </div>
 </div>
 
 <script>
 const chat = document.getElementById("chat");
 const dropArea = document.getElementById("drop-area");
 const fileInput = document.getElementById("fileInput");
+const newChatBtn = document.getElementById("newChat");
 
-// функция добавления сообщений
-function addMessage(content, type) {
-    const div = document.createElement("div");
-    div.className = "message " + type;
-    if (content instanceof HTMLImageElement)
-        div.appendChild(content);
-    else
-        div.innerText = content;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
+let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+
+function scrollToBottom() {
+    chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
 }
 
-// обработка выбранного файла
-async function handleFile(file) {
-    if(!file) return;
+function loadChatHistory() {
+    chatHistory.forEach(msg => {
+        const div = document.createElement("div");
+        div.className = "message " + msg.type;
 
+        if(msg.type === "user") {
+            const img = document.createElement("img");
+            img.className = "preview";
+            img.src = msg.imgData;
+            div.appendChild(img);
+        } else if(msg.type === "bot") {
+            if(msg.imgUrl) {
+                const img = document.createElement("img");
+                img.className = "result";
+                img.src = msg.imgUrl;
+                div.appendChild(img);
+
+                const downloadIcon = document.createElement("img");
+                downloadIcon.className = "download-icon";
+                downloadIcon.src = "frontend/images/download-icon.png";
+                downloadIcon.onclick = async () => {
+                    try {
+                        const res = await fetch(msg.imgUrl);
+                        const blob = await res.blob();
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = "result.png";
+                        a.click();
+                        URL.revokeObjectURL(a.href);
+                    } catch(err){console.error(err);}
+                };
+                div.appendChild(downloadIcon);
+            }
+
+            if(msg.metricsText){
+                const p = document.createElement("p");
+                p.innerText = msg.metricsText;
+                div.appendChild(p);
+            }
+        }
+        chat.appendChild(div);
+    });
+    scrollToBottom();
+}
+
+function addUserMessage(file) {
     const imgUser = document.createElement("img");
     imgUser.className = "preview";
     imgUser.src = URL.createObjectURL(file);
-    addMessage(imgUser, "user");
 
-    addMessage("Анализируем изображение...", "bot");
+    const div = document.createElement("div");
+    div.className = "message user";
+    div.appendChild(imgUser);
+    chat.appendChild(div);
+    scrollToBottom();
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        chatHistory.push({ type: "user", imgData: e.target.result });
+        localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    };
+    reader.readAsDataURL(file);
+}
+
+function addBotMessage(imgUrl, metricsText) {
+    const div = document.createElement("div");
+    div.className = "message bot";
+
+    if(imgUrl){
+        const img = document.createElement("img");
+        img.className = "result";
+        img.src = imgUrl + "?t=" + new Date().getTime();
+        div.appendChild(img);
+
+        const downloadIcon = document.createElement("img");
+        downloadIcon.className = "download-icon";
+        downloadIcon.src = "frontend/images/download-icon.png";
+        downloadIcon.onclick = async () => {
+            try {
+                const res = await fetch(imgUrl);
+                const blob = await res.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = "result.png";
+                a.click();
+                URL.revokeObjectURL(a.href);
+            } catch(err){console.error(err);}
+        };
+        div.appendChild(downloadIcon);
+    }
+
+    if(metricsText){
+        const p = document.createElement("p");
+        p.innerText = metricsText;
+        div.appendChild(p);
+    }
+
+    chat.appendChild(div);
+    scrollToBottom();
+
+    chatHistory.push({ type:"bot", imgUrl, metricsText });
+    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+}
+
+newChatBtn.addEventListener("click", ()=>{
+    chat.innerHTML = "";
+    chatHistory = [];
+    localStorage.removeItem("chatHistory");
+});
+
+async function handleFile(file){
+    if(!file) return;
+    addUserMessage(file);
+    addBotMessage("", "Анализируем изображение...");
 
     const formData = new FormData();
     formData.append("image", file);
 
-    try {
-        const response = await fetch("http://127.0.0.1:5000/analyze", {
-            method: "POST",
-            body: formData
-        });
+    try{
+        const response = await fetch("http://127.0.0.1:5000/analyze", { method:"POST", body: formData });
         const data = await response.json();
 
-        const imgBot = document.createElement("img");
-        imgBot.className = "result";
-        imgBot.src = data.image_url + "?t=" + new Date().getTime();
-        addMessage(imgBot, "bot");
-
-        const metricsText = 
-`Результаты анализа:
+        const metricsText = `Результаты анализа:
 
 Корень:
-Длина: ${data.metrics.root_length} см
+Длина: ${data.metrics.root_length_cm} см
+Площадь: ${data.metrics.root_area_cm2} см²
 
 Стебель:
-Длина: ${data.metrics.stem_length} см
+Длина: ${data.metrics.stem_length_cm} см
+Площадь: ${data.metrics.stem_area_cm2} см²
 
 Листья:
-Площадь: ${data.metrics.leaf_area} см²`;
+Площадь: ${data.metrics.leaf_area_cm2} см²`;
 
-        addMessage(metricsText, "bot");
-
-    } catch (err) {
-        addMessage("Ошибка при анализе изображения.", "bot");
+        addBotMessage(data.image_url, metricsText);
+    } catch(err){
+        addBotMessage("", "Ошибка при анализе изображения.");
         console.error(err);
     }
 }
 
-// обработка стандартного input
-fileInput.onchange = () => handleFile(fileInput.files[0]);
+fileInput.onchange = ()=> handleFile(fileInput.files[0]);
+dropArea.addEventListener("click", ()=> fileInput.click());
+dropArea.addEventListener("dragover", (e)=>{ e.preventDefault(); dropArea.classList.add("dragover"); });
+dropArea.addEventListener("dragleave", ()=> dropArea.classList.remove("dragover"));
+dropArea.addEventListener("drop", (e)=>{ e.preventDefault(); dropArea.classList.remove("dragover"); if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
 
-// drag & drop
-dropArea.addEventListener("click", () => fileInput.click());
-
-dropArea.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    dropArea.classList.add("dragover");
-});
-
-dropArea.addEventListener("dragleave", () => {
-    dropArea.classList.remove("dragover");
-});
-
-dropArea.addEventListener("drop", (e) => {
-    e.preventDefault();
-    dropArea.classList.remove("dragover");
-    if(e.dataTransfer.files.length) {
-        handleFile(e.dataTransfer.files[0]);
-    }
-});
+window.addEventListener("load", loadChatHistory);
 </script>
 
 </body>
