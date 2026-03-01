@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 
 # Вставьте сюда токен вашего бота (латиница, без пробелов!)
-TOKEN = "8728740717:AAH36D0H3NA54GHCVHHeQh840Wd-oXSQNtM"
+TOKEN = ""
 
 SERVER_URL = "http://localhost:5000/analyze"
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
