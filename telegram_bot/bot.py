@@ -3,7 +3,6 @@ import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 
-# Вставьте сюда токен вашего бота (латиница, без пробелов!)
 TOKEN = ""
 
 SERVER_URL = "http://localhost:5000/analyze"
@@ -20,7 +19,6 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await file.download_to_drive(input_path)
         await update.message.reply_text("Фото получено, анализируем...")
 
-        # отправляем в Flask
         with open(input_path, "rb") as f:
 
             response = requests.post(
@@ -42,7 +40,6 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Файл результата не найден")
             return
 
-        # отправляем фото
         with open(result_path, "rb") as img:
 
             await update.message.reply_photo(photo=img)
