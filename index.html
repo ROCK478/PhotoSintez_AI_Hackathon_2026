@@ -227,7 +227,8 @@ function addBotMessage(imgUrl, metricsText) {
     if(imgUrl){
         const img = document.createElement("img");
         img.className = "result";
-        img.src = imgUrl + "?t=" + new Date().getTime();
+        fetch(imgUrl, {headers: {"ngrok-skip-browser-warning": "true"}}).then(res => res.blob()).then(blob => {
+            img.src = URL.createObjectURL(blob);});
         div.appendChild(img);
 
         const downloadIcon = document.createElement("img");
