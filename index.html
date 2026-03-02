@@ -145,6 +145,9 @@ img.preview { max-width:200px; border-radius:10px; }
 </div>
 
 <script>
+
+const API_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev";
+
 const chat = document.getElementById("chat");
 const dropArea = document.getElementById("drop-area");
 const fileInput = document.getElementById("fileInput");
@@ -156,133 +159,267 @@ function scrollToBottom() {
     chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
 }
 
+
+async function loadImageNgrok(url){
+
+    const response = await fetch(url,{
+        headers:{
+            "ngrok-skip-browser-warning":"true"
+        }
+    });
+
+    if(!response.ok){
+        throw new Error("Image load failed");
+    }
+
+    const blob = await response.blob();
+
+    return URL.createObjectURL(blob);
+}
+
+
 function loadChatHistory() {
-    chatHistory.forEach(msg => {
+
+    chatHistory.forEach(async msg => {
+
         const div = document.createElement("div");
         div.className = "message " + msg.type;
 
         if(msg.type === "user") {
+
             const img = document.createElement("img");
             img.className = "preview";
             img.src = msg.imgData;
             div.appendChild(img);
+
         } else if(msg.type === "bot") {
-            if(msg.imgUrl) {
+
+            if(msg.imgUrl){
+
                 const img = document.createElement("img");
                 img.className = "result";
-                img.src = msg.imgUrl;
+
+                try{
+                    img.src = await loadImageNgrok(msg.imgUrl);
+                }catch(e){
+                    console.error(e);
+                }
+
                 div.appendChild(img);
 
                 const downloadIcon = document.createElement("img");
+
                 downloadIcon.className = "download-icon";
                 downloadIcon.src = "frontend/images/download-icon.png";
+
                 downloadIcon.onclick = async () => {
-                    try {
-                        const res = await fetch(msg.imgUrl);
+
+                    try{
+
+                        const res = await fetch(msg.imgUrl,{
+                            headers:{
+                                "ngrok-skip-browser-warning":"true"
+                            }
+                        });
+
                         const blob = await res.blob();
+
                         const a = document.createElement('a');
+
                         a.href = URL.createObjectURL(blob);
+
                         a.download = "result.png";
+
                         a.click();
+
                         URL.revokeObjectURL(a.href);
-                    } catch(err){console.error(err);}
+
+                    }catch(err){
+                        console.error(err);
+                    }
                 };
+
                 div.appendChild(downloadIcon);
             }
 
             if(msg.metricsText){
+
                 const p = document.createElement("p");
+
                 p.innerText = msg.metricsText;
+
                 div.appendChild(p);
             }
         }
+
         chat.appendChild(div);
+
     });
+
     scrollToBottom();
 }
 
+
+
 function addUserMessage(file) {
+
     const imgUser = document.createElement("img");
+
     imgUser.className = "preview";
+
     imgUser.src = URL.createObjectURL(file);
 
     const div = document.createElement("div");
+
     div.className = "message user";
+
     div.appendChild(imgUser);
+
     chat.appendChild(div);
+
     scrollToBottom();
 
     const reader = new FileReader();
+
     reader.onload = function(e) {
-        chatHistory.push({ type: "user", imgData: e.target.result });
+
+        chatHistory.push({
+
+            type: "user",
+
+            imgData: e.target.result
+
+        });
+
         localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+
     };
+
     reader.readAsDataURL(file);
 }
 
-function addBotMessage(imgUrl, metricsText) {
+
+
+async function addBotMessage(imgUrl, metricsText){
+
     const div = document.createElement("div");
+
     div.className = "message bot";
 
     if(imgUrl){
+
         const img = document.createElement("img");
+
         img.className = "result";
-        fetch(imgUrl, {headers: {"ngrok-skip-browser-warning": "true"}}).then(res => res.blob()).then(blob => {
-            img.src = URL.createObjectURL(blob);});
+
+        try{
+            img.src = await loadImageNgrok(imgUrl);
+        }catch(e){
+            console.error(e);
+        }
+
         div.appendChild(img);
 
         const downloadIcon = document.createElement("img");
+
         downloadIcon.className = "download-icon";
+
         downloadIcon.src = "frontend/images/download-icon.png";
+
         downloadIcon.onclick = async () => {
-            try {
-                const res = await fetch(imgUrl);
+
+            try{
+
+                const res = await fetch(imgUrl,{
+                    headers:{
+                        "ngrok-skip-browser-warning":"true"
+                    }
+                });
+
                 const blob = await res.blob();
+
                 const a = document.createElement('a');
+
                 a.href = URL.createObjectURL(blob);
+
                 a.download = "result.png";
+
                 a.click();
+
                 URL.revokeObjectURL(a.href);
-            } catch(err){console.error(err);}
+
+            }catch(err){
+                console.error(err);
+            }
         };
+
         div.appendChild(downloadIcon);
     }
 
     if(metricsText){
+
         const p = document.createElement("p");
+
         p.innerText = metricsText;
+
         div.appendChild(p);
     }
 
     chat.appendChild(div);
+
     scrollToBottom();
 
-    chatHistory.push({ type:"bot", imgUrl, metricsText });
+    chatHistory.push({
+
+        type:"bot",
+
+        imgUrl,
+
+        metricsText
+
+    });
+
     localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
 }
 
+
+
 newChatBtn.addEventListener("click", ()=>{
+
     chat.innerHTML = "";
+
     chatHistory = [];
+
     localStorage.removeItem("chatHistory");
 });
 
+
+
 async function handleFile(file){
+
     if(!file) return;
+
     addUserMessage(file);
+
     addBotMessage("", "Анализируем изображение...");
 
     const formData = new FormData();
+
     formData.append("image", file);
 
     try{
-        const response = await fetch("https://noddingly-endocarpoid-juan.ngrok-free.dev/analyze", {
-    method: "POST",
-    headers: {
-        "ngrok-skip-browser-warning": "true"
-    },
-    body: formData
-    });
+
+        const response = await fetch(API_URL + "/analyze", {
+
+            method:"POST",
+
+            headers:{
+                "ngrok-skip-browser-warning":"true"
+            },
+
+            body: formData
+        });
+
         const data = await response.json();
 
         const metricsText = `Результаты анализа:
@@ -299,19 +436,43 @@ async function handleFile(file){
 Площадь: ${data.metrics.leaf_area_cm2} см²`;
 
         addBotMessage(data.image_url, metricsText);
-    } catch(err){
+
+    }catch(err){
+
         addBotMessage("", "Ошибка при анализе изображения.");
+
         console.error(err);
     }
 }
 
+
+
 fileInput.onchange = ()=> handleFile(fileInput.files[0]);
+
 dropArea.addEventListener("click", ()=> fileInput.click());
-dropArea.addEventListener("dragover", (e)=>{ e.preventDefault(); dropArea.classList.add("dragover"); });
+
+dropArea.addEventListener("dragover", (e)=>{
+
+    e.preventDefault();
+
+    dropArea.classList.add("dragover");
+});
+
 dropArea.addEventListener("dragleave", ()=> dropArea.classList.remove("dragover"));
-dropArea.addEventListener("drop", (e)=>{ e.preventDefault(); dropArea.classList.remove("dragover"); if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+
+dropArea.addEventListener("drop", (e)=>{
+
+    e.preventDefault();
+
+    dropArea.classList.remove("dragover");
+
+    if(e.dataTransfer.files.length)
+        handleFile(e.dataTransfer.files[0]);
+});
+
 
 window.addEventListener("load", loadChatHistory);
+
 </script>
 
 </body>
