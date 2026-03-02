@@ -312,11 +312,7 @@ async function addBotMessage(imgUrl, metricsText){
 
         img.className = "result";
 
-        try{
-            img.src = await loadImageNgrok(imgUrl);
-        }catch(e){
-            console.error(e);
-        }
+        img.src = imgUrl;
 
         div.appendChild(img);
 
