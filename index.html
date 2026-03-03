@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>ФотоСинтез</title>
 
-<!-- Иконка сайта -->
 <link rel="icon" href="frontend/images/favicon-32x32.png" type="image/x-icon">
 
 <style>
@@ -139,7 +138,7 @@ img.preview { max-width:200px; border-radius:10px; }
 
         <div id="drop-area">
             Перетащите изображение сюда или нажмите для выбора
-            <input type="file" id="fileInput">
+            <input type="file" id="fileInput" multiple>
         </div>
     </div>
 </div>
@@ -391,59 +390,65 @@ newChatBtn.addEventListener("click", ()=>{
 
 
 
-async function handleFile(file){
+async function handleFiles(files){
 
-    if(!file) return;
-
-    addUserMessage(file);
-
-    addBotMessage("", "Анализируем изображение...");
+    if(!files || files.length === 0) return;
 
     const formData = new FormData();
 
-    formData.append("image", file);
+    for(const file of files){
+        addUserMessage(file);
+        formData.append("images", file);
+    }
+
+    addBotMessage("", "Анализируем изображения...");
 
     try{
 
         const response = await fetch(API_URL + "/analyze", {
-
             method:"POST",
-
             headers:{
                 "ngrok-skip-browser-warning":"true"
             },
-
             body: formData
         });
 
         const data = await response.json();
 
-        const metricsText = `Результаты анализа:
+        if(!data.results){
+            addBotMessage("", "Ошибка обработки.");
+            return;
+        }
+
+        for(const result of data.results){
+
+            const metrics = result.metrics;
+
+            const metricsText = `Результаты анализа:
 
 Корень:
-Длина: ${data.metrics.root_length_cm} см
-Площадь: ${data.metrics.root_area_cm2} см²
+Длина: ${metrics.root_length_cm} см
+Площадь: ${metrics.root_area_cm2} см²
 
 Стебель:
-Длина: ${data.metrics.stem_length_cm} см
-Площадь: ${data.metrics.stem_area_cm2} см²
+Длина: ${metrics.stem_length_cm} см
+Площадь: ${metrics.stem_area_cm2} см²
 
 Листья:
-Площадь: ${data.metrics.leaf_area_cm2} см²`;
+Площадь: ${metrics.leaf_area_cm2} см²`;
 
-        addBotMessage(data.image_url, metricsText);
+            addBotMessage(result.image_url, metricsText);
+        }
 
     }catch(err){
-
-        addBotMessage("", "Ошибка при анализе изображения.");
-
+        addBotMessage("", "Ошибка при анализе изображений.");
         console.error(err);
     }
 }
 
 
+fileInput.onchange = ()=> handleFiles(fileInput.files);
 
-fileInput.onchange = ()=> handleFile(fileInput.files[0]);
 
 dropArea.addEventListener("click", ()=> fileInput.click());
 
@@ -463,7 +468,7 @@ dropArea.addEventListener("drop", (e)=>{
     dropArea.classList.remove("dragover");
 
     if(e.dataTransfer.files.length)
-        handleFile(e.dataTransfer.files[0]);
+        handleFiles(e.dataTransfer.files);
 });
 
 
