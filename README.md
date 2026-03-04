@@ -11,7 +11,7 @@
 ## Инструкция пользователя: 1
 Для простого тестирования напишите мне в тг: @medvedvityan
 
-Таким образом сайт будет работать по ссылке: https://rock478.github.io/PhotoSintez_AI_Hackathon_2026/
+Подниму сервер через ngrok, сайт будет работать по ссылке: https://rock478.github.io/PhotoSintez_AI_Hackathon_2026/
 
 Телеграм бот: @PhotoSintezAI_bot
 
