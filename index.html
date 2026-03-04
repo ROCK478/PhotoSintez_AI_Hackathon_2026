@@ -4,142 +4,138 @@
 <meta charset="UTF-8">
 <title>ФотоСинтез</title>
 
-<link rel="icon" href="frontend/images/favicon-32x32.png">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="frontend/images/favicon-32x32.png" type="image/x-icon">
 
 <style>
-* { box-sizing:border-box; }
-
-body{
+body {
     margin:0;
-    font-family:'Inter',sans-serif;
-    background:linear-gradient(135deg,#eef5f1,#f8fbf9);
+    font-family: Arial, sans-serif;
+    background:#F5F7F6;
     display:flex;
     flex-direction:column;
     height:100vh;
 }
-
-.header{
-    height:80px;
-    background:rgba(255,255,255,0.7);
-    backdrop-filter:blur(10px);
+.header {
+    height:100px;
+    background:#1B5E20;
+    border-bottom:1px solid #E0E0E0;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 30px;
-    box-shadow:0 4px 20px rgba(0,0,0,0.05);
+    padding:0 20px;
+    position:relative;
 }
+.header-img.left { height:80px; object-fit:contain; }
+.header-img.center { height:80px; position:absolute; left:50%; transform:translateX(-50%); }
+.header-img.right { height:50px; object-fit:contain; }
 
-.header-img{ height:50px; }
-
-.main{ flex:1; display:flex; overflow:hidden; }
-
-.sidebar{
-    width:260px;
-    background:linear-gradient(180deg,#1F6F54,#15523F);
-    padding:25px;
+.main {
+    flex:1;
+    display:flex;
+    overflow:hidden;
+}
+.sidebar {
+    width:250px;
+    background:#2E7D32;
     display:flex;
     flex-direction:column;
     justify-content:space-between;
+    padding:20px;
     color:white;
 }
-
-.sidebar button{
-    border:none;
-    padding:12px;
-    border-radius:12px;
-    font-weight:600;
-    cursor:pointer;
-    margin-bottom:12px;
-    background:white;
-    color:#1F6F54;
-    transition:0.2s;
-}
-
-.sidebar button:hover{
-    transform:translateY(-2px);
-    box-shadow:0 8px 20px rgba(0,0,0,0.15);
-}
-
-.content{
-    flex:1;
+.sidebar-top, .sidebar-middle, .sidebar-bottom {
     display:flex;
     flex-direction:column;
 }
-
-.chat-container{
-    flex:1;
-    overflow-y:auto;
-    padding:40px;
-}
-
-.message{
-    max-width:60%;
-    padding:18px;
-    margin:18px 0;
-    border-radius:20px;
-    animation:fade 0.3s ease forwards;
-}
-
-.user{
-    background:#DFF3E7;
-    margin-left:auto;
-}
-
-.bot{
+.sidebar-top { margin-bottom:10px; }
+.sidebar-middle { flex:1; margin:10px 0; overflow-y:auto; }
+.sidebar-bottom { margin-top:10px; }
+.sidebar button {
     background:white;
-    box-shadow:0 8px 24px rgba(0,0,0,0.06);
+    color:#2E7D32;
+    border:none;
+    padding:12px;
+    border-radius:8px;
+    font-weight:600;
+    cursor:pointer;
+    margin-bottom:10px;
+    transition: all 0.2s;
+}
+.sidebar button:hover { background:#E8F5E9; }
+
+.content {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    background:#F5F7F6;
+    overflow:hidden;
+}
+.chat-container { flex:1; overflow-y:auto; padding:20px; }
+.message { max-width:60%; padding:12px; margin:10px; border-radius:16px; position:relative; opacity:0; transform: translateY(20px); animation: fadeInUp 0.3s forwards; }
+.user { background:#E8F5E9; margin-left:auto; }
+.bot { background:white; border:1px solid #E0E0E0; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+
+@keyframes fadeInUp {
+    to { opacity:1; transform:translateY(0); }
 }
 
-@keyframes fade{
-    from{opacity:0; transform:translateY(10px);}
-    to{opacity:1; transform:translateY(0);}
+.bot img.result { display:block; max-width:100%; border-radius:10px; margin-bottom:8px; transition: transform 0.2s; }
+.bot img.result:hover { transform: scale(1.05); }
+
+.bot img.download-icon {
+    width:24px;
+    height:24px;
+    position:absolute;
+    bottom:5px;
+    right:5px;
+    cursor:pointer;
 }
 
-#drop-area{
-    height:130px;
-    border:2px dashed #1F6F54;
-    border-radius:20px;
-    margin:20px 40px 30px 40px;
+#drop-area {
+    height:120px;
+    background:white;
+    border-top:1px solid #E0E0E0;
     display:flex;
     align-items:center;
     justify-content:center;
-    background:white;
-    font-weight:500;
-    cursor:pointer;
-    transition:0.3s;
+    padding:10px;
+    border: 2px dashed #2E7D32;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #2E7D32;
+    font-weight:600;
+    transition: all 0.3s ease;
 }
-
-#drop-area:hover{
-    background:#f3faf6;
-    transform:scale(1.01);
-}
-
-#fileInput{display:none;}
-img.preview,img.result{max-width:100%; border-radius:12px;}
+#drop-area.dragover { background: #E8F5E9; transform: scale(1.02); box-shadow: 0 0 10px rgba(46,125,50,0.4); }
+#fileInput { display:none; }
+img.preview { max-width:200px; border-radius:10px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-    <img src="frontend/images/logo2.png" class="header-img">
-    <img src="frontend/images/name.png" class="header-img">
-    <img src="frontend/images/user.png" class="header-img">
+    <img src="frontend/images/logo2.png" class="header-img left" alt="Left">
+    <img src="frontend/images/name.png" class="header-img center" alt="Center">
+    <img src="frontend/images/user.png" class="header-img right" alt="Right">
 </div>
 
 <div class="main">
     <div class="sidebar">
-        <div>
-            <button>Новый чат</button>
+        <div class="sidebar-top">
+            <button id="newChat">Новый чат</button>
         </div>
-        <div>
-            <div style="margin-bottom:15px;">Имя пользователя</div>
-            <button style="background:#C8F2D9;">Оформить подписку</button>
+        <div class="sidebar-middle">
+            <!-- Здесь будут чаты -->
+        </div>
+        <div class="sidebar-bottom">
+            <div>Имя пользователя</div>
+            <button id="subscribe">Оформить подписку</button>
         </div>
     </div>
 
     <div class="content">
-        <div class="chat-container"></div>
+        <div class="chat-container" id="chat"></div>
+
         <div id="drop-area">
             Перетащите изображение сюда или нажмите для выбора
             <input type="file" id="fileInput" multiple>
@@ -150,6 +146,7 @@ img.preview,img.result{max-width:100%; border-radius:12px;}
 <script>
 
 const API_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev";
+
 const chat = document.getElementById("chat");
 const dropArea = document.getElementById("drop-area");
 const fileInput = document.getElementById("fileInput");
@@ -160,6 +157,7 @@ let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 function scrollToBottom() {
     chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
 }
+
 
 async function loadImageNgrok(url){
 
@@ -174,6 +172,7 @@ async function loadImageNgrok(url){
     }
 
     const blob = await response.blob();
+
     return URL.createObjectURL(blob);
 }
 
@@ -211,6 +210,7 @@ function loadChatHistory() {
 
                 downloadIcon.className = "download-icon";
                 downloadIcon.src = "frontend/images/download-icon.png";
+
                 downloadIcon.onclick = async () => {
 
                     try{
@@ -222,10 +222,15 @@ function loadChatHistory() {
                         });
 
                         const blob = await res.blob();
+
                         const a = document.createElement('a');
+
                         a.href = URL.createObjectURL(blob);
+
                         a.download = "result.png";
+
                         a.click();
+
                         URL.revokeObjectURL(a.href);
 
                     }catch(err){
@@ -239,7 +244,9 @@ function loadChatHistory() {
             if(msg.metricsText){
 
                 const p = document.createElement("p");
+
                 p.innerText = msg.metricsText;
+
                 div.appendChild(p);
             }
         }
@@ -383,58 +390,52 @@ newChatBtn.addEventListener("click", ()=>{
 
 
 
-async function handleFiles(files){
+async function handleFiles(file){
 
-    if(!files || files.length === 0) return;
+    if(!file) return;
+
+    addUserMessage(file);
+
+    addBotMessage("", "Анализируем изображение...");
 
     const formData = new FormData();
 
-    for(const file of files){
-        addUserMessage(file);
-        formData.append("images", file);
-    }
-
-    addBotMessage("", "Анализируем изображения...");
+    formData.append("image", file);
 
     try{
 
         const response = await fetch(API_URL + "/analyze", {
+
             method:"POST",
+
             headers:{
                 "ngrok-skip-browser-warning":"true"
             },
+
             body: formData
         });
 
         const data = await response.json();
 
-        if(!data.results){
-            addBotMessage("", "Ошибка обработки.");
-            return;
-        }
-
-        for(const result of data.results){
-
-            const metrics = result.metrics;
-
-            const metricsText = `Результаты анализа:
+        const metricsText = `Результаты анализа:
 
 Корень:
-Длина: ${metrics.root_length_cm} см
-Площадь: ${metrics.root_area_cm2} см²
+Длина: ${data.metrics.root_length_cm} см
+Площадь: ${data.metrics.root_area_cm2} см²
 
 Стебель:
-Длина: ${metrics.stem_length_cm} см
-Площадь: ${metrics.stem_area_cm2} см²
+Длина: ${data.metrics.stem_length_cm} см
+Площадь: ${data.metrics.stem_area_cm2} см²
 
 Листья:
-Площадь: ${metrics.leaf_area_cm2} см²`;
+Площадь: ${data.metrics.leaf_area_cm2} см²`;
 
-            addBotMessage(result.image_url, metricsText);
-        }
+        addBotMessage(data.image_url, metricsText);
 
     }catch(err){
-        addBotMessage("", "Ошибка при анализе изображений.");
+
+        addBotMessage("", "Ошибка при анализе изображения.");
+
         console.error(err);
     }
 }
@@ -461,7 +462,7 @@ dropArea.addEventListener("drop", (e)=>{
     dropArea.classList.remove("dragover");
 
     if(e.dataTransfer.files.length)
-        handleFiles(e.dataTransfer.files);
+        handleFile(e.dataTransfer.files[0]);
 });
 
 
