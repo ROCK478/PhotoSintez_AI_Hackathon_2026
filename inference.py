@@ -27,7 +27,7 @@ def run_inference(image_path, model):
         results = model.predict(
             source=image_path,
             task="segment",
-            conf=0.12,
+            conf=0.6,
             save=False,
             verbose=False
         )
@@ -58,7 +58,7 @@ def run_inference(image_path, model):
 
             area_px = mask_area_pixels(mask)
 
-            if class_name == "корень":
+            if class_name == "root":
 
                 length_px = mask_length_pixels(mask)
 
@@ -66,7 +66,7 @@ def run_inference(image_path, model):
                 root_area_px += area_px
 
 
-            elif class_name == "стебель":
+            elif class_name == "stem":
 
                 length_px = mask_length_pixels(mask)
 
@@ -74,7 +74,7 @@ def run_inference(image_path, model):
                 stem_area_px += area_px
 
 
-            elif class_name == "листва":
+            elif class_name == "leaf":
 
                 leaf_area_px += area_px
                 print(f"Leaf area pixels: {area_px}")
@@ -96,7 +96,7 @@ def run_inference(image_path, model):
             "leaf_area_cm2": float(round(leaf_area_cm2, 3))
         }
 
-        annotated = result.plot(boxes=False, conf=False)
+        annotated = result.plot(conf=False)
         return annotated, metrics
 
 

@@ -137,7 +137,9 @@ def main():
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text)
     )
     print("Bot started")
-    app.run_polling()
+    
+    # Увеличиваем timeout для long polling до 60 секунд
+    app.run_polling(poll_interval=1, timeout=60)
 
 if __name__ == "__main__":
     main()

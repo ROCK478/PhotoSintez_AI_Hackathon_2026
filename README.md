@@ -33,17 +33,25 @@ python telegram_bot/bot.py
 
 Пример открытия через http:
 ```bash
-python -m http.server 8000                    
+python -m http.server 8080                    
 ```
 
-Далее в браузере вставляем ссылку: http://{ip}:8000/index.html, где ip - ip своего компьютера. 
+Далее в браузере вставляем ссылку: http://{ip}:8080/index.html, где ip - ip своего компьютера. 
 Бот @PhotoSintezAI_bot также станет доступен к использованию.
 
 ## Возможность автономной разметки:
-В файлах присутствует файл .pynb, откройте его (например, в Google Colab). В нем представлен скрипт обучения нейросети. Загрузите фотографии и используйте представленный код. 
+Обучение модели с теми же параметрами, которые использовались, а также получение результата через консольную команду можно следующим образом:
+```bash
+python yolo_console.py train --dataset path/to/dataset.yaml
+```
+
+```bash
+python yolo_console.py inference --model model/best.pt --image path/to/image.jpg --output results/
+```
 
 ## Особенности:
 - Клиент-серверная архитектура с единым ML-ядром
 - 4 модуля (FlaskAPI, ML-model, Frontend, Telegram-bot)
 - Индивидуальная разработка
 - Проект RoboFlow доступен по ссылке: https://app.roboflow.com/felikss-workspace/my-first-project-pczmy/
+- Ресурсы от Google Colab позволили использовать модель с более затратными ресурсами (например: imgsize=980)

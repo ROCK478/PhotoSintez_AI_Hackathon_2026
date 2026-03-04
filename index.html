@@ -5,110 +5,193 @@
 <title>ФотоСинтез</title>
 
 <link rel="icon" href="frontend/images/favicon-32x32.png" type="image/x-icon">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+* { box-sizing: border-box; }
+
 body {
     margin:0;
-    font-family: Arial, sans-serif;
-    background:#F5F7F6;
+    font-family:'Inter', sans-serif;
+    background:linear-gradient(135deg,#eef5f1,#f8fbf9);
     display:flex;
     flex-direction:column;
     height:100vh;
 }
+
+/* HEADER */
+
 .header {
-    height:100px;
-    background:#1B5E20;
-    border-bottom:1px solid #E0E0E0;
+    height:80px;
+    background:rgba(255,255,255,0.7);
+    backdrop-filter:blur(10px);
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 20px;
+    padding:0 30px;
     position:relative;
+    box-shadow:0 4px 20px rgba(0,0,0,0.05);
 }
-.header-img.left { height:80px; object-fit:contain; }
-.header-img.center { height:80px; position:absolute; left:50%; transform:translateX(-50%); }
-.header-img.right { height:50px; object-fit:contain; }
+
+.header-img.left { height:50px; object-fit:contain; }
+.header-img.center {
+    height:50px;
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+.header-img.right { height:45px; object-fit:contain; }
+
+/* LAYOUT */
 
 .main {
     flex:1;
     display:flex;
     overflow:hidden;
 }
+
+/* SIDEBAR */
+
 .sidebar {
-    width:250px;
-    background:#2E7D32;
+    width:260px;
+    background:linear-gradient(180deg,#1F6F54,#15523F);
     display:flex;
     flex-direction:column;
     justify-content:space-between;
-    padding:20px;
+    padding:25px;
     color:white;
+    box-shadow:4px 0 20px rgba(0,0,0,0.05);
 }
+
 .sidebar-top, .sidebar-middle, .sidebar-bottom {
     display:flex;
     flex-direction:column;
 }
-.sidebar-top { margin-bottom:10px; }
-.sidebar-middle { flex:1; margin:10px 0; overflow-y:auto; }
-.sidebar-bottom { margin-top:10px; }
+
 .sidebar button {
     background:white;
-    color:#2E7D32;
+    color:#1F6F54;
     border:none;
     padding:12px;
-    border-radius:8px;
+    border-radius:12px;
     font-weight:600;
     cursor:pointer;
-    margin-bottom:10px;
-    transition: all 0.2s;
+    margin-bottom:12px;
+    transition:0.2s ease;
 }
-.sidebar button:hover { background:#E8F5E9; }
+
+.sidebar button:hover {
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* CONTENT */
 
 .content {
     flex:1;
     display:flex;
     flex-direction:column;
-    background:#F5F7F6;
     overflow:hidden;
 }
-.chat-container { flex:1; overflow-y:auto; padding:20px; }
-.message { max-width:60%; padding:12px; margin:10px; border-radius:16px; position:relative; opacity:0; transform: translateY(20px); animation: fadeInUp 0.3s forwards; }
-.user { background:#E8F5E9; margin-left:auto; }
-.bot { background:white; border:1px solid #E0E0E0; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
 
-@keyframes fadeInUp {
-    to { opacity:1; transform:translateY(0); }
+.chat-container {
+    flex:1;
+    overflow-y:auto;
+    padding:40px;
 }
 
-.bot img.result { display:block; max-width:100%; border-radius:10px; margin-bottom:8px; transition: transform 0.2s; }
-.bot img.result:hover { transform: scale(1.05); }
+/* MESSAGES */
+
+.message {
+    max-width:60%;
+    padding:18px;
+    margin:18px 0;
+    border-radius:20px;
+    position:relative;
+    opacity:0;
+    transform:translateY(10px);
+    animation:fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.user {
+    background:#DFF3E7;
+    margin-left:auto;
+}
+
+.bot {
+    background:white;
+    box-shadow:0 8px 24px rgba(0,0,0,0.06);
+}
+
+/* IMAGES */
+
+img.preview {
+    max-width:200px;
+    border-radius:12px;
+}
+
+.bot img.result {
+    display:block;
+    max-width:100%;
+    border-radius:12px;
+    margin-bottom:10px;
+    transition:0.2s;
+}
+
+.bot img.result:hover {
+    transform:scale(1.03);
+}
 
 .bot img.download-icon {
     width:24px;
     height:24px;
     position:absolute;
-    bottom:5px;
-    right:5px;
+    bottom:10px;
+    right:10px;
     cursor:pointer;
+    opacity:0.7;
+    transition:0.2s;
 }
 
+.bot img.download-icon:hover {
+    opacity:1;
+    transform:scale(1.1);
+}
+
+/* DROP AREA */
+
 #drop-area {
-    height:120px;
-    background:white;
-    border-top:1px solid #E0E0E0;
+    height:130px;
+    margin:0 40px 30px 40px;
+    border:2px dashed #1F6F54;
+    border-radius:20px;
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:10px;
-    border: 2px dashed #2E7D32;
-    border-radius: 10px;
-    cursor: pointer;
-    color: #2E7D32;
-    font-weight:600;
-    transition: all 0.3s ease;
+    background:white;
+    cursor:pointer;
+    color:#1F6F54;
+    font-weight:500;
+    transition:0.3s ease;
 }
-#drop-area.dragover { background: #E8F5E9; transform: scale(1.02); box-shadow: 0 0 10px rgba(46,125,50,0.4); }
-#fileInput { display:none; }
-img.preview { max-width:200px; border-radius:10px; }
+
+#drop-area.dragover {
+    background:#f3faf6;
+    transform:scale(1.01);
+    box-shadow:0 0 15px rgba(31,111,84,0.3);
+}
+
+#fileInput {
+    display:none;
+}
 </style>
 </head>
 <body>
@@ -128,8 +211,8 @@ img.preview { max-width:200px; border-radius:10px; }
             <!-- Здесь будут чаты -->
         </div>
         <div class="sidebar-bottom">
-            <div>Имя пользователя</div>
-            <button id="subscribe">Оформить подписку</button>
+            <div style="margin-bottom:12px;">Имя пользователя</div>
+            <button id="subscribe" style="background:#C8F2D9;">Оформить подписку</button>
         </div>
     </div>
 
@@ -158,313 +241,180 @@ function scrollToBottom() {
     chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
 }
 
-
 async function loadImageNgrok(url){
-
     const response = await fetch(url,{
-        headers:{
-            "ngrok-skip-browser-warning":"true"
-        }
+        headers:{ "ngrok-skip-browser-warning":"true" }
     });
-
-    if(!response.ok){
-        throw new Error("Image load failed");
-    }
-
+    if(!response.ok) throw new Error("Image load failed");
     const blob = await response.blob();
-
     return URL.createObjectURL(blob);
 }
 
-
 function loadChatHistory() {
-
     chatHistory.forEach(async msg => {
-
         const div = document.createElement("div");
         div.className = "message " + msg.type;
 
         if(msg.type === "user") {
-
             const img = document.createElement("img");
             img.className = "preview";
             img.src = msg.imgData;
             div.appendChild(img);
-
         } else if(msg.type === "bot") {
 
             if(msg.imgUrl){
-
                 const img = document.createElement("img");
                 img.className = "result";
-
                 try{
                     img.src = await loadImageNgrok(msg.imgUrl);
-                }catch(e){
-                    console.error(e);
-                }
-
+                }catch(e){ console.error(e); }
                 div.appendChild(img);
 
                 const downloadIcon = document.createElement("img");
-
                 downloadIcon.className = "download-icon";
                 downloadIcon.src = "frontend/images/download-icon.png";
 
                 downloadIcon.onclick = async () => {
-
                     try{
-
                         const res = await fetch(msg.imgUrl,{
-                            headers:{
-                                "ngrok-skip-browser-warning":"true"
-                            }
+                            headers:{ "ngrok-skip-browser-warning":"true" }
                         });
-
                         const blob = await res.blob();
-
                         const a = document.createElement('a');
-
                         a.href = URL.createObjectURL(blob);
-
                         a.download = "result.png";
-
                         a.click();
-
                         URL.revokeObjectURL(a.href);
-
-                    }catch(err){
-                        console.error(err);
-                    }
+                    }catch(err){ console.error(err); }
                 };
 
                 div.appendChild(downloadIcon);
             }
 
             if(msg.metricsText){
-
                 const p = document.createElement("p");
-
                 p.innerText = msg.metricsText;
-
                 div.appendChild(p);
             }
         }
 
         chat.appendChild(div);
-
     });
 
     scrollToBottom();
 }
 
-
-
 function addUserMessage(file) {
-
     const imgUser = document.createElement("img");
-
     imgUser.className = "preview";
-
     imgUser.src = URL.createObjectURL(file);
 
     const div = document.createElement("div");
-
     div.className = "message user";
-
     div.appendChild(imgUser);
-
     chat.appendChild(div);
-
     scrollToBottom();
 
     const reader = new FileReader();
-
     reader.onload = function(e) {
-
-        chatHistory.push({
-
-            type: "user",
-
-            imgData: e.target.result
-
-        });
-
+        chatHistory.push({ type: "user", imgData: e.target.result });
         localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-
     };
-
     reader.readAsDataURL(file);
 }
 
-
-
 async function addBotMessage(imgUrl, metricsText){
-
     const div = document.createElement("div");
-
     div.className = "message bot";
 
     if(imgUrl){
-
         const img = document.createElement("img");
-
         img.className = "result";
-
         img.src = imgUrl;
-
         div.appendChild(img);
-
-        const downloadIcon = document.createElement("img");
-
-        downloadIcon.className = "download-icon";
-
-        downloadIcon.src = "frontend/images/download-icon.png";
-
-        downloadIcon.onclick = async () => {
-
-            try{
-
-                const res = await fetch(imgUrl,{
-                    headers:{
-                        "ngrok-skip-browser-warning":"true"
-                    }
-                });
-
-                const blob = await res.blob();
-
-                const a = document.createElement('a');
-
-                a.href = URL.createObjectURL(blob);
-
-                a.download = "result.png";
-
-                a.click();
-
-                URL.revokeObjectURL(a.href);
-
-            }catch(err){
-                console.error(err);
-            }
-        };
-
-        div.appendChild(downloadIcon);
     }
 
     if(metricsText){
-
         const p = document.createElement("p");
-
         p.innerText = metricsText;
-
         div.appendChild(p);
     }
 
     chat.appendChild(div);
-
     scrollToBottom();
 
-    chatHistory.push({
-
-        type:"bot",
-
-        imgUrl,
-
-        metricsText
-
-    });
-
+    chatHistory.push({ type:"bot", imgUrl, metricsText });
     localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
 }
 
-
-
 newChatBtn.addEventListener("click", ()=>{
-
     chat.innerHTML = "";
-
     chatHistory = [];
-
     localStorage.removeItem("chatHistory");
 });
 
-
-
-async function handleFiles(file){
-
-    if(!file) return;
-
-    addUserMessage(file);
-
-    addBotMessage("", "Анализируем изображение...");
+async function handleFiles(files){
+    if(!files || files.length === 0) return;
 
     const formData = new FormData();
 
-    formData.append("image", file);
+    for(const file of files){
+        addUserMessage(file);
+        formData.append("images", file);
+    }
+
+    addBotMessage("", "Анализируем изображения...");
 
     try{
-
         const response = await fetch(API_URL + "/analyze", {
-
             method:"POST",
-
-            headers:{
-                "ngrok-skip-browser-warning":"true"
-            },
-
+            headers:{ "ngrok-skip-browser-warning":"true" },
             body: formData
         });
 
         const data = await response.json();
+        if(!data.results){
+            addBotMessage("", "Ошибка обработки.");
+            return;
+        }
 
-        const metricsText = `Результаты анализа:
+        for(const result of data.results){
+            const metrics = result.metrics;
+            const metricsText = `Результаты анализа:
 
 Корень:
-Длина: ${data.metrics.root_length_cm} см
-Площадь: ${data.metrics.root_area_cm2} см²
+Длина: ${metrics.root_length_cm} см
+Площадь: ${metrics.root_area_cm2} см²
 
 Стебель:
-Длина: ${data.metrics.stem_length_cm} см
-Площадь: ${data.metrics.stem_area_cm2} см²
+Длина: ${metrics.stem_length_cm} см
+Площадь: ${metrics.stem_area_cm2} см²
 
 Листья:
-Площадь: ${data.metrics.leaf_area_cm2} см²`;
+Площадь: ${metrics.leaf_area_cm2} см²`;
 
-        addBotMessage(data.image_url, metricsText);
+            addBotMessage(result.image_url, metricsText);
+        }
 
     }catch(err){
-
-        addBotMessage("", "Ошибка при анализе изображения.");
-
+        addBotMessage("", "Ошибка при анализе изображений.");
         console.error(err);
     }
 }
 
-
 fileInput.onchange = ()=> handleFiles(fileInput.files);
-
-
 dropArea.addEventListener("click", ()=> fileInput.click());
-
-dropArea.addEventListener("dragover", (e)=>{
-
+dropArea.addEventListener("dragover", e=>{
     e.preventDefault();
-
     dropArea.classList.add("dragover");
 });
-
 dropArea.addEventListener("dragleave", ()=> dropArea.classList.remove("dragover"));
-
-dropArea.addEventListener("drop", (e)=>{
-
+dropArea.addEventListener("drop", e=>{
     e.preventDefault();
-
     dropArea.classList.remove("dragover");
-
     if(e.dataTransfer.files.length)
-        handleFile(e.dataTransfer.files[0]);
+        handleFiles(e.dataTransfer.files);
 });
-
 
 window.addEventListener("load", loadChatHistory);
 
