@@ -228,7 +228,7 @@ img.preview {
 
 <script>
 
-const API_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev";
+const API_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev"; // замените на ваш ngrok URL
 
 const chat = document.getElementById("chat");
 const dropArea = document.getElementById("drop-area");
@@ -241,57 +241,24 @@ function scrollToBottom() {
     chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
 }
 
-async function loadImageNgrok(url){
-    const response = await fetch(url,{
-        headers:{ "ngrok-skip-browser-warning":"true" }
-    });
-    if(!response.ok) throw new Error("Image load failed");
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
-}
-
 function loadChatHistory() {
-    chatHistory.forEach(async msg => {
+    chatHistory.forEach(msg => {
         const div = document.createElement("div");
         div.className = "message " + msg.type;
 
-        if(msg.type === "user") {
+        if (msg.type === "user") {
             const img = document.createElement("img");
             img.className = "preview";
             img.src = msg.imgData;
             div.appendChild(img);
-        } else if(msg.type === "bot") {
-
-            if(msg.imgUrl){
+        } else if (msg.type === "bot") {
+            if (msg.imgUrl) {
                 const img = document.createElement("img");
                 img.className = "result";
-                try{
-                    img.src = await loadImageNgrok(msg.imgUrl);
-                }catch(e){ console.error(e); }
+                img.src = msg.imgUrl; // напрямую вставляем URL
                 div.appendChild(img);
-
-                const downloadIcon = document.createElement("img");
-                downloadIcon.className = "download-icon";
-                downloadIcon.src = "frontend/images/download-icon.png";
-
-                downloadIcon.onclick = async () => {
-                    try{
-                        const res = await fetch(msg.imgUrl,{
-                            headers:{ "ngrok-skip-browser-warning":"true" }
-                        });
-                        const blob = await res.blob();
-                        const a = document.createElement('a');
-                        a.href = URL.createObjectURL(blob);
-                        a.download = "result.png";
-                        a.click();
-                        URL.revokeObjectURL(a.href);
-                    }catch(err){ console.error(err); }
-                };
-
-                div.appendChild(downloadIcon);
             }
-
-            if(msg.metricsText){
+            if (msg.metricsText) {
                 const p = document.createElement("p");
                 p.innerText = msg.metricsText;
                 div.appendChild(p);
@@ -300,7 +267,6 @@ function loadChatHistory() {
 
         chat.appendChild(div);
     });
-
     scrollToBottom();
 }
 
@@ -357,7 +323,6 @@ async function handleFiles(files){
     if(!files || files.length === 0) return;
 
     const formData = new FormData();
-
     for(const file of files){
         addUserMessage(file);
         formData.append("images", file);
@@ -365,14 +330,14 @@ async function handleFiles(files){
 
     addBotMessage("", "Анализируем изображения...");
 
-    try{
+    try {
         const response = await fetch(API_URL + "/analyze", {
             method:"POST",
-            headers:{ "ngrok-skip-browser-warning":"true" },
             body: formData
         });
 
         const data = await response.json();
+
         if(!data.results){
             addBotMessage("", "Ошибка обработки.");
             return;
@@ -396,7 +361,7 @@ async function handleFiles(files){
             addBotMessage(result.image_url, metricsText);
         }
 
-    }catch(err){
+    } catch(err){
         addBotMessage("", "Ошибка при анализе изображений.");
         console.error(err);
     }
