@@ -16,6 +16,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 
 app = Flask(__name__)
+app.config['SERVER_NAME'] = None
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["RESULT_FOLDER"] = RESULT_FOLDER
@@ -24,7 +25,7 @@ print("Loading YOLO model...")
 model = YOLO(MODEL_PATH)
 print("Model loaded successfully")
 
-NGROK_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev"  # ваш URL ngrok
+NGROK_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev"
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -43,7 +44,6 @@ def analyze():
             result_img, metrics = run_inference(input_path, model)
             cv2.imwrite(output_path, result_img)
 
-            # Прямой URL с ngrok для доступа пользователя
             image_url = f"{NGROK_URL}/proxy_image/{filename}"
             results.append({"image_url": image_url, "metrics": metrics})
 
@@ -59,8 +59,7 @@ def proxy_image(filename):
     if not os.path.exists(full_path):
         return abort(404)
 
-    # Отправляем как attachment, чтобы браузер точно загрузил
-    return send_file(full_path, mimetype="image/jpeg", as_attachment=True, download_name=filename)
+    return send_file(full_path, as_attachment=True, download_name=filename)
 
 @app.route("/health", methods=["GET"])
 def health():

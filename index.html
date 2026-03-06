@@ -79,7 +79,8 @@ img.preview { max-width:200px; border-radius:12px; }
 </div>
 
 <script>
-const API_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev";
+const API_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev/analyze";
+
 const chat = document.getElementById("chat");
 const dropArea = document.getElementById("drop-area");
 const fileInput = document.getElementById("fileInput");
@@ -87,13 +88,16 @@ const newChatBtn = document.getElementById("newChat");
 
 let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 
-function scrollToBottom(){ chat.scrollTo({ top: chat.scrollHeight, behavior:"smooth" }); }
+function scrollToBottom(){
+    chat.scrollTo({ top: chat.scrollHeight, behavior:"smooth" });
+}
 
 function createDownloadIcon(url){
     const icon = document.createElement("img");
     icon.src = "frontend/images/download-icon.png";
     icon.className = "download-icon";
-    icon.onclick = ()=>{ 
+
+    icon.onclick = ()=>{
         const a = document.createElement("a");
         a.href = url;
         a.download = "result.png";
@@ -101,124 +105,218 @@ function createDownloadIcon(url){
         a.click();
         a.remove();
     };
+
     return icon;
 }
 
-function loadChatHistory(){
-    chatHistory.forEach(msg=>{
-        const div = document.createElement("div");
-        div.className = "message "+msg.type;
-        if(msg.type==="user"){
-            const img = document.createElement("img");
-            img.className="preview";
-            img.src=msg.imgData;
-            div.appendChild(img);
-        } else if(msg.type==="bot"){
-            if(msg.imgUrl){
-                const img = document.createElement("img");
-                img.className="result";
-                img.src=msg.imgUrl;
-                div.appendChild(img);
-                div.appendChild(createDownloadIcon(msg.imgUrl));
-            }
-            if(msg.metricsText){
-                const p=document.createElement("p");
-                p.innerText=msg.metricsText;
-                div.appendChild(p);
-            }
-        }
-        chat.appendChild(div);
-    });
-    scrollToBottom();
-}
-
 function addUserMessage(file){
-    const imgUser = document.createElement("img");
-    imgUser.className="preview";
-    imgUser.src=URL.createObjectURL(file);
 
-    const div=document.createElement("div");
-    div.className="message user";
-    div.appendChild(imgUser);
+    const img = document.createElement("img");
+    img.className = "preview";
+    img.src = URL.createObjectURL(file);
+
+    const div = document.createElement("div");
+    div.className = "message user";
+    div.appendChild(img);
+
     chat.appendChild(div);
     scrollToBottom();
 
-    const reader=new FileReader();
-    reader.onload=e=>{
-        chatHistory.push({type:"user",imgData:e.target.result});
-        localStorage.setItem("chatHistory",JSON.stringify(chatHistory));
+    const reader = new FileReader();
+    reader.onload = e=>{
+        chatHistory.push({
+            type:"user",
+            imgData:e.target.result
+        });
+
+        localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
     };
+
     reader.readAsDataURL(file);
 }
 
-async function addBotMessage(imgUrl, metricsText){
-    const div=document.createElement("div");
-    div.className="message bot";
-    if(imgUrl){
-        const img=document.createElement("img");
-        img.className="result";
-        img.src=imgUrl;
+function addBotMessage(imageUrl, metricsText){
+
+    const div = document.createElement("div");
+    div.className = "message bot";
+
+    if(imageUrl){
+
+        const img = document.createElement("img");
+        img.className = "result";
+        img.src = imageUrl;
+
         div.appendChild(img);
-        div.appendChild(createDownloadIcon(imgUrl));
+        div.appendChild(createDownloadIcon(imageUrl));
     }
+
     if(metricsText){
-        const p=document.createElement("p");
-        p.innerText=metricsText;
+
+        const p = document.createElement("p");
+        p.innerText = metricsText;
+
         div.appendChild(p);
     }
+
     chat.appendChild(div);
+
+    chatHistory.push({
+        type:"bot",
+        imgUrl:imageUrl,
+        metricsText:metricsText
+    });
+
+    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+
     scrollToBottom();
-    chatHistory.push({type:"bot",imgUrl,metricsText});
-    localStorage.setItem("chatHistory",JSON.stringify(chatHistory));
+}
+
+function showProcessing(){
+    addBotMessage("", "Фото получены, анализируем...");
+}
+
+function showFinished(){
+    addBotMessage("", "Анализ завершен");
+}
+
+async function handleFiles(files){
+
+    if(!files || files.length === 0) return;
+
+    const formData = new FormData();
+
+    for(const file of files){
+
+        addUserMessage(file);
+
+        // EXACT same field as telegram bot
+        formData.append("images", file);
+    }
+
+    showProcessing();
+
+    try{
+
+        const response = await fetch(API_URL, {
+            method:"POST",
+            body:formData
+        });
+
+        if(!response.ok){
+            addBotMessage("", "Ошибка сервера");
+            return;
+        }
+
+        const data = await response.json();
+
+        if(!data.results){
+            addBotMessage("", "Ошибка анализа изображения");
+            return;
+        }
+
+        for(const result of data.results){
+
+            const m = result.metrics;
+
+            const metricsText =
+`Результаты анализа:
+
+Корень:
+Длина: ${m.root_length_cm} см
+Площадь: ${m.root_area_cm2} см²
+
+Стебель:
+Длина: ${m.stem_length_cm} см
+Площадь: ${m.stem_area_cm2} см²
+
+Листья:
+Площадь: ${m.leaf_area_cm2} см²`;
+
+            addBotMessage(result.image_url, metricsText);
+        }
+
+        showFinished();
+
+    }catch(err){
+
+        console.error(err);
+        addBotMessage("", "Ошибка анализа изображения");
+    }
+}
+
+function loadChatHistory(){
+
+    chatHistory.forEach(msg=>{
+
+        const div = document.createElement("div");
+        div.className = "message "+msg.type;
+
+        if(msg.type === "user"){
+
+            const img = document.createElement("img");
+            img.className="preview";
+            img.src = msg.imgData;
+
+            div.appendChild(img);
+        }
+
+        if(msg.type === "bot"){
+
+            if(msg.imgUrl){
+
+                const img = document.createElement("img");
+                img.className="result";
+                img.src = msg.imgUrl;
+
+                div.appendChild(img);
+                div.appendChild(createDownloadIcon(msg.imgUrl));
+            }
+
+            if(msg.metricsText){
+
+                const p = document.createElement("p");
+                p.innerText = msg.metricsText;
+
+                div.appendChild(p);
+            }
+        }
+
+        chat.appendChild(div);
+    });
+
+    scrollToBottom();
 }
 
 newChatBtn.addEventListener("click", ()=>{
-    chat.innerHTML="";
-    chatHistory=[];
+
+    chat.innerHTML = "";
+    chatHistory = [];
+
     localStorage.removeItem("chatHistory");
 });
 
-async function handleFiles(files){
-    if(!files || files.length===0) return;
-    const formData=new FormData();
-    for(const file of files){
-        addUserMessage(file);
-        formData.append("images",file);
+fileInput.onchange = ()=> handleFiles(fileInput.files);
+
+dropArea.addEventListener("click", ()=> fileInput.click());
+
+dropArea.addEventListener("dragover", e=>{
+    e.preventDefault();
+    dropArea.classList.add("dragover");
+});
+
+dropArea.addEventListener("dragleave", ()=>{
+    dropArea.classList.remove("dragover");
+});
+
+dropArea.addEventListener("drop", e=>{
+
+    e.preventDefault();
+    dropArea.classList.remove("dragover");
+
+    if(e.dataTransfer.files.length){
+        handleFiles(e.dataTransfer.files);
     }
-    addBotMessage("", "Анализируем изображения...");
-
-    try{
-        const response=await fetch(API_URL+"/analyze",{method:"POST",body:formData});
-        const data=await response.json();
-        if(!data.results){ addBotMessage("", "Ошибка обработки."); return; }
-
-        for(const result of data.results){
-            const metrics=result.metrics;
-            const metricsText=`Результаты анализа:
-
-Корень:
-Длина: ${metrics.root_length_cm} см
-Площадь: ${metrics.root_area_cm2} см²
-
-Стебель:
-Длина: ${metrics.stem_length_cm} см
-Площадь: ${metrics.stem_area_cm2} см²
-
-Листья:
-Площадь: ${metrics.leaf_area_cm2} см²`;
-            addBotMessage(result.image_url, metricsText);
-        }
-    } catch(err){
-        addBotMessage("", "Ошибка при анализе изображений.");
-        console.error(err);
-    }
-}
-
-fileInput.onchange=()=>handleFiles(fileInput.files);
-dropArea.addEventListener("click",()=>fileInput.click());
-dropArea.addEventListener("dragover", e=>{ e.preventDefault(); dropArea.classList.add("dragover"); });
-dropArea.addEventListener("dragleave",()=>dropArea.classList.remove("dragover"));
-dropArea.addEventListener("drop", e=>{ e.preventDefault(); dropArea.classList.remove("dragover"); if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+});
 
 window.addEventListener("load", loadChatHistory);
 </script>
