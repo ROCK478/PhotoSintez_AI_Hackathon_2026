@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file, abort, make_response, url_for
+from flask import Flask, request, jsonify, send_file, abort, make_response
 from flask_cors import CORS
 import os, uuid, traceback
 import cv2
@@ -16,18 +16,15 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 
 app = Flask(__name__)
-CORS(app)  # позволяет GitHub Pages делать запросы
+CORS(app)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["RESULT_FOLDER"] = RESULT_FOLDER
-
-@app.after_request
-def add_cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    return response
 
 print("Loading YOLO model...")
 model = YOLO(MODEL_PATH)
 print("Model loaded successfully")
+
+NGROK_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev"  # ваш URL ngrok
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -46,7 +43,8 @@ def analyze():
             result_img, metrics = run_inference(input_path, model)
             cv2.imwrite(output_path, result_img)
 
-            image_url = url_for("proxy_image", filename=filename, _external=True)
+            # Прямой URL с ngrok для доступа пользователя
+            image_url = f"{NGROK_URL}/proxy_image/{filename}"
             results.append({"image_url": image_url, "metrics": metrics})
 
         return jsonify({"results": results})
@@ -61,13 +59,8 @@ def proxy_image(filename):
     if not os.path.exists(full_path):
         return abort(404)
 
-    ext = os.path.splitext(full_path)[1].lower()
-    mimetype = "image/png" if ext == ".png" else "image/jpeg"
-
-    response = make_response(send_file(full_path, mimetype=mimetype))
-    response.headers["Cache-Control"] = "no-cache"
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    return response
+    # Отправляем как attachment, чтобы браузер точно загрузил
+    return send_file(full_path, mimetype="image/jpeg", as_attachment=False)
 
 @app.route("/health", methods=["GET"])
 def health():

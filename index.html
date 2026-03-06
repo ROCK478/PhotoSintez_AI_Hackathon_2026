@@ -9,7 +9,6 @@
 
 <style>
 * { box-sizing: border-box; }
-
 body {
     margin:0;
     font-family:'Inter', sans-serif;
@@ -185,7 +184,7 @@ img.preview { max-width:200px; border-radius:12px; }
 </div>
 
 <script>
-const API_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev"; // <-- вставьте HTTPS ngrok URL
+const API_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev";
 
 const chat = document.getElementById("chat");
 const dropArea = document.getElementById("drop-area");
@@ -198,7 +197,7 @@ function scrollToBottom() { chat.scrollTo({ top: chat.scrollHeight, behavior: "s
 
 function createDownloadIcon(url){
     const icon = document.createElement("img");
-    icon.src = "frontend/download-icon.png";
+    icon.src = "frontend/images/download-icon.png"; // исправлено
     icon.className = "download-icon";
     icon.onclick = async () => {
         const response = await fetch(url);
