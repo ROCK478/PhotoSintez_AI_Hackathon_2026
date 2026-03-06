@@ -20,7 +20,6 @@ body {
 }
 
 /* HEADER */
-
 .header {
     height:80px;
     background:rgba(255,255,255,0.7);
@@ -32,7 +31,6 @@ body {
     position:relative;
     box-shadow:0 4px 20px rgba(0,0,0,0.05);
 }
-
 .header-img.left { height:50px; object-fit:contain; }
 .header-img.center {
     height:50px;
@@ -44,7 +42,6 @@ body {
 .header-img.right { height:45px; object-fit:contain; }
 
 /* LAYOUT */
-
 .main {
     flex:1;
     display:flex;
@@ -52,7 +49,6 @@ body {
 }
 
 /* SIDEBAR */
-
 .sidebar {
     width:260px;
     background:linear-gradient(180deg,#1F6F54,#15523F);
@@ -63,12 +59,7 @@ body {
     color:white;
     box-shadow:4px 0 20px rgba(0,0,0,0.05);
 }
-
-.sidebar-top, .sidebar-middle, .sidebar-bottom {
-    display:flex;
-    flex-direction:column;
-}
-
+.sidebar-top, .sidebar-middle, .sidebar-bottom { display:flex; flex-direction:column; }
 .sidebar button {
     background:white;
     color:#1F6F54;
@@ -80,21 +71,18 @@ body {
     margin-bottom:12px;
     transition:0.2s ease;
 }
-
 .sidebar button:hover {
     transform:translateY(-2px);
     box-shadow:0 8px 20px rgba(0,0,0,0.15);
 }
 
 /* CONTENT */
-
 .content {
     flex:1;
     display:flex;
     flex-direction:column;
     overflow:hidden;
 }
-
 .chat-container {
     flex:1;
     overflow-y:auto;
@@ -102,7 +90,6 @@ body {
 }
 
 /* MESSAGES */
-
 .message {
     max-width:60%;
     padding:18px;
@@ -113,31 +100,14 @@ body {
     transform:translateY(10px);
     animation:fadeIn 0.3s ease forwards;
 }
-
 @keyframes fadeIn {
-    to {
-        opacity:1;
-        transform:translateY(0);
-    }
+    to { opacity:1; transform:translateY(0); }
 }
-
-.user {
-    background:#DFF3E7;
-    margin-left:auto;
-}
-
-.bot {
-    background:white;
-    box-shadow:0 8px 24px rgba(0,0,0,0.06);
-}
+.user { background:#DFF3E7; margin-left:auto; }
+.bot { background:white; box-shadow:0 8px 24px rgba(0,0,0,0.06); }
 
 /* IMAGES */
-
-img.preview {
-    max-width:200px;
-    border-radius:12px;
-}
-
+img.preview { max-width:200px; border-radius:12px; }
 .bot img.result {
     display:block;
     max-width:100%;
@@ -145,11 +115,7 @@ img.preview {
     margin-bottom:10px;
     transition:0.2s;
 }
-
-.bot img.result:hover {
-    transform:scale(1.03);
-}
-
+.bot img.result:hover { transform:scale(1.03); }
 .bot img.download-icon {
     width:24px;
     height:24px;
@@ -160,14 +126,12 @@ img.preview {
     opacity:0.7;
     transition:0.2s;
 }
-
 .bot img.download-icon:hover {
     opacity:1;
     transform:scale(1.1);
 }
 
 /* DROP AREA */
-
 #drop-area {
     height:130px;
     margin:0 40px 30px 40px;
@@ -182,16 +146,12 @@ img.preview {
     font-weight:500;
     transition:0.3s ease;
 }
-
 #drop-area.dragover {
     background:#f3faf6;
     transform:scale(1.01);
     box-shadow:0 0 15px rgba(31,111,84,0.3);
 }
-
-#fileInput {
-    display:none;
-}
+#fileInput { display:none; }
 </style>
 </head>
 <body>
@@ -207,9 +167,7 @@ img.preview {
         <div class="sidebar-top">
             <button id="newChat">Новый чат</button>
         </div>
-        <div class="sidebar-middle">
-            <!-- Здесь будут чаты -->
-        </div>
+        <div class="sidebar-middle"></div>
         <div class="sidebar-bottom">
             <div style="margin-bottom:12px;">Имя пользователя</div>
             <button id="subscribe" style="background:#C8F2D9;">Оформить подписку</button>
@@ -227,8 +185,7 @@ img.preview {
 </div>
 
 <script>
-
-const API_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev";
+const API_URL = "https://YOUR_NGROK_URL"; // <-- вставьте HTTPS ngrok URL
 
 const chat = document.getElementById("chat");
 const dropArea = document.getElementById("drop-area");
@@ -237,8 +194,23 @@ const newChatBtn = document.getElementById("newChat");
 
 let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 
-function scrollToBottom() {
-    chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
+function scrollToBottom() { chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" }); }
+
+function createDownloadIcon(url){
+    const icon = document.createElement("img");
+    icon.src = "frontend/download-icon.png";
+    icon.className = "download-icon";
+    icon.onclick = async () => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "result.png";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    };
+    return icon;
 }
 
 function loadChatHistory() {
@@ -255,8 +227,9 @@ function loadChatHistory() {
             if (msg.imgUrl) {
                 const img = document.createElement("img");
                 img.className = "result";
-                img.src = msg.imgUrl; // напрямую вставляем URL
+                img.src = msg.imgUrl;
                 div.appendChild(img);
+                div.appendChild(createDownloadIcon(msg.imgUrl));
             }
             if (msg.metricsText) {
                 const p = document.createElement("p");
@@ -264,7 +237,6 @@ function loadChatHistory() {
                 div.appendChild(p);
             }
         }
-
         chat.appendChild(div);
     });
     scrollToBottom();
@@ -282,7 +254,7 @@ function addUserMessage(file) {
     scrollToBottom();
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = e => {
         chatHistory.push({ type: "user", imgData: e.target.result });
         localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
     };
@@ -292,23 +264,20 @@ function addUserMessage(file) {
 async function addBotMessage(imgUrl, metricsText){
     const div = document.createElement("div");
     div.className = "message bot";
-
     if(imgUrl){
         const img = document.createElement("img");
         img.className = "result";
         img.src = imgUrl;
         div.appendChild(img);
+        div.appendChild(createDownloadIcon(imgUrl));
     }
-
     if(metricsText){
         const p = document.createElement("p");
         p.innerText = metricsText;
         div.appendChild(p);
     }
-
     chat.appendChild(div);
     scrollToBottom();
-
     chatHistory.push({ type:"bot", imgUrl, metricsText });
     localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
 }
@@ -321,27 +290,18 @@ newChatBtn.addEventListener("click", ()=>{
 
 async function handleFiles(files){
     if(!files || files.length === 0) return;
-
     const formData = new FormData();
     for(const file of files){
         addUserMessage(file);
         formData.append("images", file);
     }
-
     addBotMessage("", "Анализируем изображения...");
 
     try {
-        const response = await fetch(API_URL + "/analyze", {
-            method:"POST",
-            body: formData
-        });
-
+        const response = await fetch(API_URL + "/analyze", { method:"POST", body: formData });
         const data = await response.json();
 
-        if(!data.results){
-            addBotMessage("", "Ошибка обработки.");
-            return;
-        }
+        if(!data.results){ addBotMessage("", "Ошибка обработки."); return; }
 
         for(const result of data.results){
             const metrics = result.metrics;
@@ -357,7 +317,6 @@ async function handleFiles(files){
 
 Листья:
 Площадь: ${metrics.leaf_area_cm2} см²`;
-
             addBotMessage(result.image_url, metricsText);
         }
 
@@ -368,21 +327,13 @@ async function handleFiles(files){
 }
 
 fileInput.onchange = ()=> handleFiles(fileInput.files);
+
 dropArea.addEventListener("click", ()=> fileInput.click());
-dropArea.addEventListener("dragover", e=>{
-    e.preventDefault();
-    dropArea.classList.add("dragover");
-});
+dropArea.addEventListener("dragover", e=>{ e.preventDefault(); dropArea.classList.add("dragover"); });
 dropArea.addEventListener("dragleave", ()=> dropArea.classList.remove("dragover"));
-dropArea.addEventListener("drop", e=>{
-    e.preventDefault();
-    dropArea.classList.remove("dragover");
-    if(e.dataTransfer.files.length)
-        handleFiles(e.dataTransfer.files);
-});
+dropArea.addEventListener("drop", e=>{ e.preventDefault(); dropArea.classList.remove("dragover"); if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
 
 window.addEventListener("load", loadChatHistory);
-
 </script>
 
 </body>
