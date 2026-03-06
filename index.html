@@ -198,9 +198,12 @@ async function handleFiles(files){
     try{
 
         const response = await fetch(API_URL, {
-            method:"POST",
-            body:formData
-        });
+            method: "POST",
+            body: formData,
+            headers: {
+                "ngrok-skip-browser-warning": "true"
+            }
+}       );
 
         if(!response.ok){
             addBotMessage("", "Ошибка сервера");
