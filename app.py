@@ -15,7 +15,11 @@ MODEL_PATH = os.path.join(BASE_DIR, "model", "best.pt")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder="frontend",
+    static_url_path=""
+)
 app.config['SERVER_NAME'] = None
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -25,7 +29,11 @@ print("Loading YOLO model...")
 model = YOLO(MODEL_PATH)
 print("Model loaded successfully")
 
-NGROK_URL = "https://noddingly-endocarpoid-juan.ngrok-free.dev"
+NGROK_URL = "http://127.0.0.1:8000"
+
+@app.route("/")
+def index():
+    return send_file(os.path.join("frontend", "index.html"))
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -59,7 +67,7 @@ def proxy_image(filename):
     if not os.path.exists(full_path):
         return abort(404)
 
-    return send_file(full_path, as_attachment=True, download_name=filename)
+    return send_file(full_path)
 
 @app.route("/health", methods=["GET"])
 def health():
