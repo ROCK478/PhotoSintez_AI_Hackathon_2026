@@ -9,63 +9,21 @@
 
 <style>
 * { box-sizing: border-box; }
-body {
-    margin:0;
-    font-family:'Inter', sans-serif;
-    background:linear-gradient(135deg,#eef5f1,#f8fbf9);
-    display:flex;
-    flex-direction:column;
-    height:100vh;
-}
+body { margin:0; font-family:'Inter', sans-serif; background:linear-gradient(135deg,#eef5f1,#f8fbf9); display:flex; flex-direction:column; height:100vh; }
 
 /* HEADER */
-.header {
-    height:80px;
-    background:rgba(255,255,255,0.7);
-    backdrop-filter:blur(10px);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 30px;
-    position:relative;
-    box-shadow:0 4px 20px rgba(0,0,0,0.05);
-}
+.header { height:80px; background:rgba(255,255,255,0.7); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:space-between; padding:0 30px; position:relative; box-shadow:0 4px 20px rgba(0,0,0,0.05); }
 .header-img.left { height:50px; object-fit:contain; }
-.header-img.center {
-    height:50px;
-    position:absolute;
-    left:50%;
-    transform:translateX(-50%);
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
-}
+.header-img.center { height:50px; position:absolute; left:50%; transform:translateX(-50%); filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)); }
 .header-img.right { height:45px; object-fit:contain; }
 
 /* LAYOUT */
 .main { flex:1; display:flex; overflow:hidden; }
 
 /* SIDEBAR */
-.sidebar {
-    width:260px;
-    background:linear-gradient(180deg,#1F6F54,#15523F);
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    padding:25px;
-    color:white;
-    box-shadow:4px 0 20px rgba(0,0,0,0.05);
-}
+.sidebar { width:260px; background:linear-gradient(180deg,#1F6F54,#15523F); display:flex; flex-direction:column; justify-content:space-between; padding:25px; color:white; box-shadow:4px 0 20px rgba(0,0,0,0.05); }
 .sidebar-top, .sidebar-middle, .sidebar-bottom { display:flex; flex-direction:column; }
-.sidebar button {
-    background:white;
-    color:#1F6F54;
-    border:none;
-    padding:12px;
-    border-radius:12px;
-    font-weight:600;
-    cursor:pointer;
-    margin-bottom:12px;
-    transition:0.2s ease;
-}
+.sidebar button { background:white; color:#1F6F54; border:none; padding:12px; border-radius:12px; font-weight:600; cursor:pointer; margin-bottom:12px; transition:0.2s ease; }
 .sidebar button:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
 
 /* CONTENT */
@@ -73,62 +31,21 @@ body {
 .chat-container { flex:1; overflow-y:auto; padding:40px; }
 
 /* MESSAGES */
-.message {
-    max-width:60%;
-    padding:18px;
-    margin:18px 0;
-    border-radius:20px;
-    position:relative;
-    opacity:0;
-    transform:translateY(10px);
-    animation:fadeIn 0.3s ease forwards;
-}
+.message { max-width:60%; padding:18px; margin:18px 0; border-radius:20px; position:relative; opacity:0; transform:translateY(10px); animation:fadeIn 0.3s ease forwards; }
 @keyframes fadeIn { to { opacity:1; transform:translateY(0); } }
 .user { background:#DFF3E7; margin-left:auto; }
 .bot { background:white; box-shadow:0 8px 24px rgba(0,0,0,0.06); }
 
 /* IMAGES */
 img.preview { max-width:200px; border-radius:12px; }
-.bot img.result {
-    display:block;
-    max-width:100%;
-    border-radius:12px;
-    margin-bottom:10px;
-    transition:0.2s;
-}
+.bot img.result { display:block; max-width:100%; border-radius:12px; margin-bottom:10px; transition:0.2s; }
 .bot img.result:hover { transform:scale(1.03); }
-.bot img.download-icon {
-    width:24px;
-    height:24px;
-    position:absolute;
-    bottom:10px;
-    right:10px;
-    cursor:pointer;
-    opacity:0.7;
-    transition:0.2s;
-}
+.bot img.download-icon { width:24px; height:24px; position:absolute; bottom:10px; right:10px; cursor:pointer; opacity:0.7; transition:0.2s; }
 .bot img.download-icon:hover { opacity:1; transform:scale(1.1); }
 
 /* DROP AREA */
-#drop-area {
-    height:130px;
-    margin:0 40px 30px 40px;
-    border:2px dashed #1F6F54;
-    border-radius:20px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:white;
-    cursor:pointer;
-    color:#1F6F54;
-    font-weight:500;
-    transition:0.3s ease;
-}
-#drop-area.dragover {
-    background:#f3faf6;
-    transform:scale(1.01);
-    box-shadow:0 0 15px rgba(31,111,84,0.3);
-}
+#drop-area { height:130px; margin:0 40px 30px 40px; border:2px dashed #1F6F54; border-radius:20px; display:flex; align-items:center; justify-content:center; background:white; cursor:pointer; color:#1F6F54; font-weight:500; transition:0.3s ease; }
+#drop-area.dragover { background:#f3faf6; transform:scale(1.01); box-shadow:0 0 15px rgba(31,111,84,0.3); }
 #fileInput { display:none; }
 </style>
 </head>
@@ -170,57 +87,43 @@ const newChatBtn = document.getElementById("newChat");
 
 let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 
-function scrollToBottom() { chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" }); }
+function scrollToBottom(){ chat.scrollTo({ top: chat.scrollHeight, behavior:"smooth" }); }
 
-// Создаём иконку скачивания с поддержкой Safari
 function createDownloadIcon(url){
     const icon = document.createElement("img");
     icon.src = "frontend/images/download-icon.png";
     icon.className = "download-icon";
-    icon.onclick = async () => {
-        try {
-            const response = await fetch(url, { mode: 'cors' });
-            if(!response.ok) throw new Error('Ошибка загрузки изображения');
-            const blob = await response.blob();
-
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const a = document.createElement("a");
-                a.href = reader.result; // DataURL
-                a.download = "result.png";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            };
-            reader.readAsDataURL(blob);
-        } catch(err){
-            alert("Не удалось скачать изображение в Safari");
-            console.error(err);
-        }
+    icon.onclick = ()=>{ 
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "result.png";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
     };
     return icon;
 }
 
-function loadChatHistory() {
-    chatHistory.forEach(msg => {
+function loadChatHistory(){
+    chatHistory.forEach(msg=>{
         const div = document.createElement("div");
-        div.className = "message " + msg.type;
-        if(msg.type === "user"){
+        div.className = "message "+msg.type;
+        if(msg.type==="user"){
             const img = document.createElement("img");
-            img.className = "preview";
-            img.src = msg.imgData;
+            img.className="preview";
+            img.src=msg.imgData;
             div.appendChild(img);
-        } else if(msg.type === "bot"){
+        } else if(msg.type==="bot"){
             if(msg.imgUrl){
                 const img = document.createElement("img");
-                img.className = "result";
-                img.src = msg.imgUrl;
+                img.className="result";
+                img.src=msg.imgUrl;
                 div.appendChild(img);
                 div.appendChild(createDownloadIcon(msg.imgUrl));
             }
             if(msg.metricsText){
-                const p = document.createElement("p");
-                p.innerText = msg.metricsText;
+                const p=document.createElement("p");
+                p.innerText=msg.metricsText;
                 div.appendChild(p);
             }
         }
@@ -231,67 +134,67 @@ function loadChatHistory() {
 
 function addUserMessage(file){
     const imgUser = document.createElement("img");
-    imgUser.className = "preview";
-    imgUser.src = URL.createObjectURL(file);
+    imgUser.className="preview";
+    imgUser.src=URL.createObjectURL(file);
 
-    const div = document.createElement("div");
-    div.className = "message user";
+    const div=document.createElement("div");
+    div.className="message user";
     div.appendChild(imgUser);
     chat.appendChild(div);
     scrollToBottom();
 
-    const reader = new FileReader();
-    reader.onload = e => {
-        chatHistory.push({ type:"user", imgData: e.target.result });
-        localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    const reader=new FileReader();
+    reader.onload=e=>{
+        chatHistory.push({type:"user",imgData:e.target.result});
+        localStorage.setItem("chatHistory",JSON.stringify(chatHistory));
     };
     reader.readAsDataURL(file);
 }
 
 async function addBotMessage(imgUrl, metricsText){
-    const div = document.createElement("div");
-    div.className = "message bot";
+    const div=document.createElement("div");
+    div.className="message bot";
     if(imgUrl){
-        const img = document.createElement("img");
-        img.className = "result";
-        img.src = imgUrl;
+        const img=document.createElement("img");
+        img.className="result";
+        img.src=imgUrl;
         div.appendChild(img);
         div.appendChild(createDownloadIcon(imgUrl));
     }
     if(metricsText){
-        const p = document.createElement("p");
-        p.innerText = metricsText;
+        const p=document.createElement("p");
+        p.innerText=metricsText;
         div.appendChild(p);
     }
     chat.appendChild(div);
     scrollToBottom();
-    chatHistory.push({ type:"bot", imgUrl, metricsText });
-    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    chatHistory.push({type:"bot",imgUrl,metricsText});
+    localStorage.setItem("chatHistory",JSON.stringify(chatHistory));
 }
 
 newChatBtn.addEventListener("click", ()=>{
-    chat.innerHTML = "";
-    chatHistory = [];
+    chat.innerHTML="";
+    chatHistory=[];
     localStorage.removeItem("chatHistory");
 });
 
 async function handleFiles(files){
     if(!files || files.length===0) return;
-    const formData = new FormData();
+    const formData=new FormData();
     for(const file of files){
         addUserMessage(file);
-        formData.append("images", file);
+        formData.append("images",file);
     }
     addBotMessage("", "Анализируем изображения...");
 
     try{
-        const response = await fetch(API_URL+"/analyze", { method:"POST", body:formData });
-        const data = await response.json();
+        const response=await fetch(API_URL+"/analyze",{method:"POST",body:formData});
+        const data=await response.json();
         if(!data.results){ addBotMessage("", "Ошибка обработки."); return; }
 
         for(const result of data.results){
-            const metrics = result.metrics;
-            const metricsText = `Результаты анализа:
+            const metrics=result.metrics;
+            const metricsText=`Результаты анализа:
 
 Корень:
 Длина: ${metrics.root_length_cm} см
@@ -305,17 +208,16 @@ async function handleFiles(files){
 Площадь: ${metrics.leaf_area_cm2} см²`;
             addBotMessage(result.image_url, metricsText);
         }
-
     } catch(err){
         addBotMessage("", "Ошибка при анализе изображений.");
         console.error(err);
     }
 }
 
-fileInput.onchange = ()=> handleFiles(fileInput.files);
-dropArea.addEventListener("click", ()=> fileInput.click());
+fileInput.onchange=()=>handleFiles(fileInput.files);
+dropArea.addEventListener("click",()=>fileInput.click());
 dropArea.addEventListener("dragover", e=>{ e.preventDefault(); dropArea.classList.add("dragover"); });
-dropArea.addEventListener("dragleave", ()=> dropArea.classList.remove("dragover"));
+dropArea.addEventListener("dragleave",()=>dropArea.classList.remove("dragover"));
 dropArea.addEventListener("drop", e=>{ e.preventDefault(); dropArea.classList.remove("dragover"); if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
 
 window.addEventListener("load", loadChatHistory);
