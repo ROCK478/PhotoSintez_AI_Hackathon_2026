@@ -113,7 +113,6 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     caption=metrics_text
                     )
 
-        await update.message.reply_text("Анализ завершен")
 
     except Exception as e:
         print("BOT ERROR:", e)

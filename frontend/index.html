@@ -94,7 +94,7 @@ function scrollToBottom(){
 
 function createDownloadIcon(url){
     const icon = document.createElement("img");
-    icon.src = "frontend/images/download-icon.png";
+    icon.src = "images/download-icon.png";
     icon.className = "download-icon";
 
     icon.onclick = ()=>{
@@ -175,10 +175,6 @@ function showProcessing(){
     addBotMessage("", "Фото получены, анализируем...");
 }
 
-function showFinished(){
-    addBotMessage("", "Анализ завершен");
-}
-
 async function handleFiles(files){
 
     if(!files || files.length === 0) return;
@@ -237,8 +233,6 @@ async function handleFiles(files){
 
             addBotMessage(result.image_url, metricsText);
         }
-
-        showFinished();
 
     }catch(err){
 
