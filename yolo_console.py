@@ -29,7 +29,7 @@ def run_inference_folder_with_metrics(image_dir, model, output_dir, metrics_file
         return
 
     metrics_path = os.path.join(output_dir, metrics_file)
-    with open(metrics_path, "w") as f_metrics:
+    with open(metrics_path, "a") as f_metrics:
         for image_name in image_files:
             image_path = os.path.join(image_dir, image_name)
             try:

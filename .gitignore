@@ -3,3 +3,5 @@ uploads/
 runs/
 results/
 temp/
+DS_Store
+test_images/
