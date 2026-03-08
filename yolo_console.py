@@ -103,21 +103,29 @@ def train_model(dataset_path):
     model = YOLO("yolo11m-seg.pt")  # фиксированная модель
     train_args = dict(
         data=dataset_path,
-        epochs=400,
-        imgsz=960,
-        batch=2,
-        device=0,  # фиксированное устройство
-        workers=4,
-        optimizer="AdamW",
-        lr0=5e-4,
-        cos_lr=True,
-        weight_decay=5e-4,
-        overlap_mask=True,
-        mask_ratio=1,
-        mosaic=1.0,
-        mixup=0.1,
-        copy_paste=0.3,
-        amp=True
+    epochs=200,
+    imgsz=992,
+    batch=2,
+    device=device,
+    workers=4,
+    optimizer="AdamW",
+    lr0=5e-4,
+    cos_lr=True,
+    weight_decay=5e-4,
+    overlap_mask=True,
+    mask_ratio=4,
+    mosaic=0.1,
+    mixup=0.0,
+    copy_paste=0.3,
+    amp=True,
+    close_mosaic=20,
+    degrees=10,
+    translate=0.05,
+    scale=0.1,
+    shear=0.0,
+    hsv_h=0.015,
+    hsv_s=0.7,
+    hsv_v=0.4
     )
     model.train(**train_args)
 
