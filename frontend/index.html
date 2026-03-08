@@ -21,10 +21,17 @@ body { margin:0; font-family:'Inter', sans-serif; background:linear-gradient(135
 .main { flex:1; display:flex; overflow:hidden; }
 
 /* SIDEBAR */
-.sidebar { width:260px; background:linear-gradient(180deg,#1F6F54,#15523F); display:flex; flex-direction:column; justify-content:space-between; padding:25px; color:white; box-shadow:4px 0 20px rgba(0,0,0,0.05); }
-.sidebar-top, .sidebar-middle, .sidebar-bottom { display:flex; flex-direction:column; }
+.sidebar { width:260px; background:linear-gradient(180deg,#1F6F54,#15523F); display:flex; flex-direction:column; justify-content:flex-start;; padding:25px; color:white; box-shadow:4px 0 20px rgba(0,0,0,0.05); }
+.sidebar-top { display:flex; flex-direction:column; }
+.sidebar-middle { display:flex; flex:1; flex-direction:column; }
+.sidebar-bottom { display:flex; flex-direction:column; width:100%;}
 .sidebar button { background:white; color:#1F6F54; border:none; padding:12px; border-radius:12px; font-weight:600; cursor:pointer; margin-bottom:12px; transition:0.2s ease; }
 .sidebar button:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
+.sidebar-middle{
+overflow-y:auto;
+max-height:70vh;
+}
+
 
 /* CONTENT */
 .content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
@@ -47,6 +54,42 @@ img.preview { max-width:200px; border-radius:12px; }
 #drop-area { height:130px; margin:0 40px 30px 40px; border:2px dashed #1F6F54; border-radius:20px; display:flex; align-items:center; justify-content:center; background:white; cursor:pointer; color:#1F6F54; font-weight:500; transition:0.3s ease; }
 #drop-area.dragover { background:#f3faf6; transform:scale(1.01); box-shadow:0 0 15px rgba(31,111,84,0.3); }
 #fileInput { display:none; }
+
+/* CHAT ITEM */
+
+.chat-item{position:relative;}
+
+.chat-delete{
+position:absolute;
+right:8px;
+top:50%;
+transform:translateY(-50%);
+width:18px;
+height:18px;
+cursor:pointer;
+opacity:0;
+transition:0.2s;
+}
+
+.chat-item:hover .chat-delete{
+opacity:1;
+}
+
+.chat-item button{
+width:100%;
+text-align:left;
+padding-right:30px;
+}
+
+.chat-item.active button{
+background:#E6F5EE;
+border:2px solid #1F6F54;
+}
+
+.chat-item.active button:hover{
+transform:none;
+box-shadow:none;
+}
 </style>
 </head>
 <body>
@@ -54,7 +97,7 @@ img.preview { max-width:200px; border-radius:12px; }
 <div class="header">
     <img src="images/logo2.png" class="header-img left" alt="Left">
     <img src="images/name.png" class="header-img center" alt="Center">
-    <img src="images/user.png" class="header-img right" alt="Right">
+    <img src="images/user.png" class="header-img right" id="profileBtn" alt="Right">
 </div>
 
 <div class="main">
@@ -62,10 +105,13 @@ img.preview { max-width:200px; border-radius:12px; }
         <div class="sidebar-top">
             <button id="newChat">Новый чат</button>
         </div>
+        <img src="images/divider.png" class="sidebar-divider">
         <div class="sidebar-middle"></div>
+        <img src="images/divider.png" class="sidebar-divider">
         <div class="sidebar-bottom">
-            <div style="margin-bottom:12px;">Имя пользователя</div>
+            <div id="username" style="margin-bottom:12px;">...</div>
             <button id="subscribe" style="background:#C8F2D9;">Оформить подписку</button>
+            <button id="logout" style="background:#C8F2D9;">Выйти</button>
         </div>
     </div>
 
@@ -86,8 +132,125 @@ const dropArea = document.getElementById("drop-area");
 const fileInput = document.getElementById("fileInput");
 const newChatBtn = document.getElementById("newChat");
 
-let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+let chats = JSON.parse(localStorage.getItem("chats")) || [];
+let currentChatId = null;
 
+// -------- AUTH & USERNAME --------
+function checkAuth(){
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+
+    if(!token){
+        window.location.href = "/login";
+        return;
+    }
+
+    document.getElementById("username").innerText = username;
+}
+
+document.getElementById("logout")?.addEventListener("click", ()=>{
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    window.location.href = "/login";
+});
+
+// -------- CHAT MANAGEMENT --------
+function createNewChat(){
+    const chatId = "chat_" + Date.now();
+    const chatObj = { id: chatId, messages: [] };
+    chats.push(chatObj);
+    localStorage.setItem("chats", JSON.stringify(chats));
+    currentChatId = chatId;
+    renderChatList();
+    renderChat();
+}
+
+function getCurrentChat(){
+    return chats.find(c => c.id === currentChatId);
+}
+
+function renderChatList(){
+const container = document.querySelector(".sidebar-middle")
+container.innerHTML=""
+chats.forEach((chatItem,index)=>{
+const wrapper=document.createElement("div")
+wrapper.className="chat-item"
+if(chatItem.id===currentChatId){
+wrapper.classList.add("active")
+}
+const btn=document.createElement("button")
+btn.innerText="Чат "+(index+1)
+
+btn.onclick=()=>{
+currentChatId=chatItem.id
+renderChatList()
+renderChat()
+}
+
+const deleteIcon=document.createElement("img")
+deleteIcon.src="images/close.png"
+deleteIcon.className="chat-delete"
+
+deleteIcon.onclick=(e)=>{
+
+e.stopPropagation()
+
+chats = chats.filter(c=>c.id!==chatItem.id)
+
+localStorage.setItem("chats",JSON.stringify(chats))
+
+if(chats.length===0){
+createNewChat()
+}else{
+currentChatId = chats[0].id
+}
+renderChatList()
+renderChat()
+}
+wrapper.appendChild(btn)
+wrapper.appendChild(deleteIcon)
+container.appendChild(wrapper)
+})
+}
+
+function renderChat(){
+    chat.innerHTML = "";
+    const current = getCurrentChat();
+    if(!current) return;
+
+    current.messages.forEach(msg=>{
+        const div = document.createElement("div");
+        div.className = "message "+msg.type;
+
+        if(msg.type==="user"){
+            const img = document.createElement("img");
+            img.className="preview";
+            img.src = msg.imgData;
+            div.appendChild(img);
+        }
+
+        if(msg.type==="bot"){
+            if(msg.imgUrl){
+                const img = document.createElement("img");
+                img.className="result";
+                img.src = msg.imgUrl;
+                div.appendChild(img);
+                div.appendChild(createDownloadIcon(msg.imgUrl));
+            }
+            if(msg.metricsText){
+                const p = document.createElement("p");
+                p.innerText = msg.metricsText;
+                div.appendChild(p);
+            }
+        }
+
+        chat.appendChild(div);
+    });
+
+    scrollToBottom();
+}
+
+// -------- MESSAGES --------
 function scrollToBottom(){
     chat.scrollTo({ top: chat.scrollHeight, behavior:"smooth" });
 }
@@ -110,7 +273,6 @@ function createDownloadIcon(url){
 }
 
 function addUserMessage(file){
-
     const img = document.createElement("img");
     img.className = "preview";
     img.src = URL.createObjectURL(file);
@@ -124,49 +286,41 @@ function addUserMessage(file){
 
     const reader = new FileReader();
     reader.onload = e=>{
-        chatHistory.push({
+        getCurrentChat().messages.push({
             type:"user",
             imgData:e.target.result
         });
-
-        localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+        localStorage.setItem("chats", JSON.stringify(chats));
     };
-
     reader.readAsDataURL(file);
 }
 
 function addBotMessage(imageUrl, metricsText){
-
     const div = document.createElement("div");
     div.className = "message bot";
 
     if(imageUrl){
-
         const img = document.createElement("img");
         img.className = "result";
         img.src = imageUrl;
-
         div.appendChild(img);
         div.appendChild(createDownloadIcon(imageUrl));
     }
 
     if(metricsText){
-
         const p = document.createElement("p");
         p.innerText = metricsText;
-
         div.appendChild(p);
     }
 
     chat.appendChild(div);
 
-    chatHistory.push({
+    getCurrentChat().messages.push({
         type:"bot",
-        imgUrl:imageUrl,
-        metricsText:metricsText
+        imgUrl: imageUrl,
+        metricsText: metricsText
     });
-
-    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    localStorage.setItem("chats", JSON.stringify(chats));
 
     scrollToBottom();
 }
@@ -175,31 +329,24 @@ function showProcessing(){
     addBotMessage("", "Фото получены, анализируем...");
 }
 
+// -------- FILE HANDLING --------
 async function handleFiles(files){
-
     if(!files || files.length === 0) return;
 
     const formData = new FormData();
-
     for(const file of files){
-
         addUserMessage(file);
-
-        // EXACT same field as telegram bot
         formData.append("images", file);
     }
 
     showProcessing();
 
     try{
-
         const response = await fetch(API_URL, {
-            method: "POST",
+            method:"POST",
             body: formData,
-            headers: {
-                "ngrok-skip-browser-warning": "true"
-            }
-}       );
+            headers: { "ngrok-skip-browser-warning":"true" }
+        });
 
         if(!response.ok){
             addBotMessage("", "Ошибка сервера");
@@ -207,18 +354,14 @@ async function handleFiles(files){
         }
 
         const data = await response.json();
-
         if(!data.results){
             addBotMessage("", "Ошибка анализа изображения");
             return;
         }
 
         for(const result of data.results){
-
             const m = result.metrics;
-
-            const metricsText =
-`Результаты анализа:
+            const metricsText = `Результаты анализа:
 
 Корень:
 Длина: ${m.root_length_cm} см
@@ -235,87 +378,38 @@ async function handleFiles(files){
         }
 
     }catch(err){
-
         console.error(err);
         addBotMessage("", "Ошибка анализа изображения");
     }
 }
 
-function loadChatHistory(){
-
-    chatHistory.forEach(msg=>{
-
-        const div = document.createElement("div");
-        div.className = "message "+msg.type;
-
-        if(msg.type === "user"){
-
-            const img = document.createElement("img");
-            img.className="preview";
-            img.src = msg.imgData;
-
-            div.appendChild(img);
-        }
-
-        if(msg.type === "bot"){
-
-            if(msg.imgUrl){
-
-                const img = document.createElement("img");
-                img.className="result";
-                img.src = msg.imgUrl;
-
-                div.appendChild(img);
-                div.appendChild(createDownloadIcon(msg.imgUrl));
-            }
-
-            if(msg.metricsText){
-
-                const p = document.createElement("p");
-                p.innerText = msg.metricsText;
-
-                div.appendChild(p);
-            }
-        }
-
-        chat.appendChild(div);
-    });
-
-    scrollToBottom();
-}
-
-newChatBtn.addEventListener("click", ()=>{
-
-    chat.innerHTML = "";
-    chatHistory = [];
-
-    localStorage.removeItem("chatHistory");
-});
-
+// -------- DROP AREA --------
 fileInput.onchange = ()=> handleFiles(fileInput.files);
 
 dropArea.addEventListener("click", ()=> fileInput.click());
-
 dropArea.addEventListener("dragover", e=>{
     e.preventDefault();
     dropArea.classList.add("dragover");
 });
-
-dropArea.addEventListener("dragleave", ()=>{
-    dropArea.classList.remove("dragover");
-});
-
+dropArea.addEventListener("dragleave", ()=> dropArea.classList.remove("dragover"));
 dropArea.addEventListener("drop", e=>{
-
     e.preventDefault();
     dropArea.classList.remove("dragover");
-
-    if(e.dataTransfer.files.length){
-        handleFiles(e.dataTransfer.files);
-    }
+    if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
 });
 
-window.addEventListener("load", loadChatHistory);
+// -------- INITIAL LOAD --------
+window.addEventListener("load", ()=>{
+    checkAuth();
+    if(chats.length===0) createNewChat();
+    else currentChatId = chats[0].id;
+    renderChatList();
+    renderChat();
+});
+
+newChatBtn.addEventListener("click", createNewChat);
+document.getElementById("subscribe").onclick=()=>{window.location.href="/pricing"}
+document.getElementById("profileBtn").onclick=()=>{window.location.href="/profile"}
 </script>
 
 </body>

@@ -3,7 +3,7 @@ import traceback
 import numpy as np
 from skimage.morphology import skeletonize
 
-PIXELS_PER_CM = 95.0
+PIXELS_PER_CM = 45.0
 CM_PER_PIXEL = 1.0 / PIXELS_PER_CM
 CM2_PER_PIXEL2 = CM_PER_PIXEL ** 2
 

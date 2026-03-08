@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Тарифы — ФотоСинтез</title>
+
+<link rel="icon" href="images/favicon-32x32.png" type="image/x-icon">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{box-sizing:border-box;}
+
+body{
+margin:0;
+font-family:'Inter',sans-serif;
+background:linear-gradient(135deg,#eef5f1,#f8fbf9);
+display:flex;
+flex-direction:column;
+height:100vh;
+}
+
+/* HEADER */
+
+.header{
+height:80px;
+background:rgba(255,255,255,0.7);
+backdrop-filter:blur(10px);
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 30px;
+position:relative;
+box-shadow:0 4px 20px rgba(0,0,0,0.05);
+}
+
+.header-img.left{height:50px;}
+.header-img.center{
+height:50px;
+position:absolute;
+left:50%;
+transform:translateX(-50%);
+}
+.header-img.right{height:45px;cursor:pointer;}
+
+/* LAYOUT */
+
+.main{
+flex:1;
+display:flex;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:260px;
+background:linear-gradient(180deg,#1F6F54,#15523F);
+display:flex;
+flex-direction:column;
+padding:25px;
+color:white;
+}
+
+.sidebar button{
+background:white;
+color:#1F6F54;
+border:none;
+padding:12px;
+border-radius:12px;
+font-weight:600;
+cursor:pointer;
+margin-bottom:12px;
+}
+
+/* CONTENT */
+
+.content{
+flex:1;
+padding:50px;
+overflow:auto;
+}
+
+/* TITLE */
+
+.title{
+font-size:32px;
+font-weight:700;
+margin-bottom:40px;
+color:#1F6F54;
+}
+
+/* PLANS */
+
+.plans{
+display:flex;
+gap:30px;
+}
+
+.plan{
+background:white;
+padding:35px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+width:280px;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+}
+
+.plan h2{
+margin:0 0 10px 0;
+color:#1F6F54;
+}
+
+.price{
+font-size:28px;
+font-weight:700;
+margin-bottom:20px;
+}
+
+.plan ul{
+padding-left:18px;
+margin-bottom:30px;
+}
+
+.plan button{
+background:#1F6F54;
+color:white;
+border:none;
+padding:12px;
+border-radius:12px;
+font-weight:600;
+cursor:pointer;
+}
+
+.plan.pro{
+border:2px solid #1F6F54;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<img src="images/logo2.png" class="header-img left">
+<img src="images/name.png" class="header-img center">
+<img src="images/user.png" class="header-img right" onclick="location.href='/profile'">
+</div>
+
+<div class="main">
+
+<div class="sidebar">
+
+<button onclick="location.href='/main'">Чат</button>
+<button onclick="location.href='/pricing'">Тарифы</button>
+
+<div style="flex:1"></div>
+
+<div id="username"></div>
+
+<button onclick="logout()">Выйти</button>
+
+</div>
+
+<div class="content">
+
+<div class="title">Тарифы</div>
+
+<div class="plans">
+
+<div class="plan">
+
+<h2>Free</h2>
+
+<div class="price">0 ₽</div>
+
+<ul>
+<li>10 анализов изображений</li>
+<li>Базовый анализ растений</li>
+<li>История чатов</li>
+</ul>
+
+<button>Текущий тариф</button>
+
+</div>
+
+
+<div class="plan pro">
+
+<h2>Pro</h2>
+
+<div class="price">250 ₽ / месяц</div>
+
+<ul>
+<li>Без ограничений анализов</li>
+<li>Быстрая обработка</li>
+<li>Приоритетная очередь</li>
+<li>Скачивание результатов</li>
+</ul>
+
+<button>Оформить подписку</button>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+document.getElementById("username").innerText =
+"Пользователь: " + localStorage.getItem("username")
+
+function logout(){
+localStorage.removeItem("token")
+localStorage.removeItem("username")
+location.href="/login"
+}
+
+</script>
+
+</body>
+</html>

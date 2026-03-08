@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PhotoSintez</title>
+<link rel="icon" href="images/favicon-32x32.png" type="image/x-icon">
+<style>
+
+body{
+font-family:Arial;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background:#eef5f1;
+}
+
+.container{
+background:white;
+padding:40px;
+border-radius:12px;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+width:300px;
+text-align:center;
+}
+
+input{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-top:10px;
+background:#1F6F54;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.switch{
+margin-top:15px;
+font-size:14px;
+cursor:pointer;
+color:#1F6F54;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2 id="title">Login</h2>
+
+<input id="username" placeholder="Username" style="display:none">
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button id="submitBtn">Login</button>
+
+<div class="switch" id="switchMode">
+Нет аккаунта? Зарегистрироваться
+</div>
+
+</div>
+
+<script>
+
+let mode="login"
+
+const title=document.getElementById("title")
+const username=document.getElementById("username")
+const submitBtn=document.getElementById("submitBtn")
+const switchMode=document.getElementById("switchMode")
+
+switchMode.onclick=()=>{
+
+if(mode==="login"){
+
+mode="register"
+title.innerText="Register"
+submitBtn.innerText="Register"
+username.style.display="block"
+switchMode.innerText="Уже есть аккаунт? Войти"
+
+}else{
+
+mode="login"
+title.innerText="Login"
+submitBtn.innerText="Login"
+username.style.display="none"
+switchMode.innerText="Нет аккаунта? Зарегистрироваться"
+
+}
+
+}
+
+submitBtn.onclick=async()=>{
+
+const data={
+email:email.value,
+password:password.value
+}
+
+if(mode==="register"){
+data.username=username.value
+}
+
+const url = mode==="login" ? "/login" : "/register"
+
+const res = await fetch(url,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(data)
+})
+
+const result=await res.json()
+
+if(result.access_token){
+
+localStorage.setItem("token",result.access_token)
+localStorage.setItem("username",result.username)
+
+window.location.href="/main"
+
+}else if(result.status==="registered"){
+
+// сразу логиним после регистрации
+
+const loginRes = await fetch("/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+email:email.value,
+password:password.value
+})
+})
+
+const loginData=await loginRes.json()
+
+localStorage.setItem("token",loginData.access_token)
+localStorage.setItem("username",loginData.username)
+
+window.location.href="/main"
+
+}else{
+
+alert(result.error)
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
