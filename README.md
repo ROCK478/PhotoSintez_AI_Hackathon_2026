@@ -30,9 +30,9 @@ python telegram_bot/bot.py
 ```bash
 python yolo_console.py train --dataset path/to/dataset.yaml
 ```
-2. Режим инференса. --model - путь до модели. --image - путь до папки с изображениями. --output - путь, куда вывести сегментированные изображения. Все изображения в папке будут сегментированы и сохранены с исходным названием, метрики будут записаны в файл metrics.txt с указанием названия изображенияы
+2. Режим инференса. --model - путь до модели (по умолчанию: model/best.pt). --image - путь до папки с изображениями. --output - путь, куда вывести сегментированные изображения. Все изображения в папке будут сегментированы и сохранены с исходным названием, метрики будут записаны в файл metrics.txt с указанием названия изображенияы
 ```bash
-python yolo_console.py inference --model model/best.pt --image path/to/image.jpg --output results/
+python yolo_console.py inference --image path/to/images --output results/
 ```
 
 ## Особенности:
@@ -40,7 +40,7 @@ python yolo_console.py inference --model model/best.pt --image path/to/image.jpg
 - 4 модуля (FlaskAPI, ML-model, Frontend, Telegram-bot)
 - Индивидуальная разработка
 - Проект RoboFlow доступен по ссылке: https://app.roboflow.com/felikss-workspace/my-first-project-pczmy/
-- Ресурсы от Google Colab позволили использовать модель с более затратными ресурсами (например: imgsize=980)
+- Обучение выполнялось на ресурсах от Google Colab
 
 ## Дальнейшие улучшения
 - Увеличение тренировочных изображений с рукколой в чашке петри для повышения качества модели на схожие изображения
