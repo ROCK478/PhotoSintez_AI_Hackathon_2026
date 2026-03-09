@@ -27,7 +27,7 @@ def run_inference(image_path, model):
         results = model.predict(
             source=image_path,
             task="segment",
-            conf=0.2,
+            conf=0.6,
             save=False,
             verbose=False
         )
